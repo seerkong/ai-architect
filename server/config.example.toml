@@ -1,0 +1,39 @@
+# AI Web Architect Server Configuration
+
+[server]
+port = 3000
+host = "0.0.0.0"
+node_env = "development"
+
+[cors]
+origin = "*"
+
+[database]
+host = "127.0.0.1"
+port = 3306
+database = "mydb"
+username = "myaccount"
+password = "123456"
+dialect = "mysql"
+
+[ai_provider]
+provider = "openai"  # claude or openai
+
+[claude]
+base_url = "https://example.com/v1/apps"
+api_key = "your_key"
+tech_doc_gen_model = "your_model_name"
+
+[openai]
+base_url = "https://example.com/v1/apps"
+api_key = "your_key"
+tech_doc_gen_model = "your_model_name"
+
+[image_recognition]
+api_key = "your_key"
+model = "your_model_name"
+
+[docs_api]
+base_url = "https://your-online-doc-api"
+app_key = "your-app-key-here"
+secret_key = "your-secret-key-here"

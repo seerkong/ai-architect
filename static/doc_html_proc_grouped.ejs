@@ -1,0 +1,712 @@
+<html>
+
+<head>
+  <style>
+    input[type='checkbox'] {
+      display: none;
+    }
+
+    label:before {
+      background: rgb(30, 150, 235);
+      border-radius: 3px;
+      height: 16px;
+      width: 16px;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    input[type='checkbox']+label:before {
+      content: '';
+      background: rgb(30, 150, 235);
+      color: #fff;
+      font-size: 16px;
+      line-height: 16px;
+      text-align: center;
+    }
+
+    input[type='checkbox']:checked+label:before {
+      content: '✓';
+    }
+
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+
+    code {
+      background-color: #f5f5f5;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      display: block;
+    }
+
+    /* 表格中的代码块特殊处理 */
+    td code {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      display: inline-block;
+      max-width: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    /* 修复表格中<br>标签不生效的问题 */
+    td {
+      white-space: pre-line;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #34495e;
+      border-bottom: 2px solid #95a5a6;
+      padding-bottom: 8px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+
+    h3 {
+      color: #2c3e50;
+      background-color: #ecf0f1;
+      padding: 8px 12px;
+      border-left: 4px solid #3498db;
+      margin-top: 25px;
+      margin-bottom: 12px;
+    }
+
+    h4 {
+      color: #e74c3c;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    h5 {
+      color: #8e44ad;
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+
+    .module-section {
+      margin-bottom: 40px;
+      border: 1px solid #bdc3c7;
+      border-radius: 8px;
+      padding: 20px;
+      background-color: #fafafa;
+    }
+
+    .procedure-section {
+      margin-bottom: 30px;
+      border: 1px solid #d5dbdb;
+      border-radius: 6px;
+      padding: 15px;
+      background-color: #ffffff;
+    }
+
+    /* 代码块折叠功能样式 */
+    .code-block {
+      margin: 10px 0;
+    }
+
+    .code-header {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-bottom: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      color: #495057;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .code-header:hover {
+      background-color: #e9ecef;
+    }
+
+    .code-toggle {
+      font-size: 14px;
+      transition: transform 0.2s ease;
+    }
+
+    .code-toggle.collapsed {
+      transform: rotate(-90deg);
+    }
+
+    .code-content {
+      border: 1px solid #dee2e6;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .code-content.collapsed {
+      max-height: 0;
+      border: none;
+    }
+
+    .code-content.expanded {
+      max-height: none;
+    }
+
+    .code-content pre {
+      margin: 0;
+      border-radius: 0;
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="width: 80vw; margin: 40px auto; font-family: Arial, sans-serif;">
+
+    <!-- 1. 模块部分 -->
+    <h1>模块总览</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>模块标题</th>
+          <th>模块ID</th>
+          <th>版本</th>
+          <th>业务描述</th>
+          <th>技术总结</th>
+          <th>依赖模块</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% const moduleKeys=Object.keys(Module); if (moduleKeys.length===0) { %>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <% } else { moduleKeys.forEach(function(moduleId) { %>
+            <tr>
+              <td>
+                <%= Module[moduleId].title || '' %>
+              </td>
+              <td>
+                <%= moduleId %>
+              </td>
+              <td>
+                <%= Module[moduleId].version || '' %>
+              </td>
+              <td>
+                <%= Module[moduleId].businessDesc || '' %>
+              </td>
+              <td>
+                <%= Module[moduleId].techSummary || '' %>
+              </td>
+              <td><%- Module[moduleId].dependency ? Module[moduleId].dependency.moduleIds.join('<br>') : '' %></td>
+            </tr>
+            <% }); } %>
+      </tbody>
+    </table>
+
+    <!-- 2. 数据建模部分 -->
+    <h1>数据建模</h1>
+
+    <!-- 2.1 枚举总览 -->
+    <h2>枚举总览</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>枚举标题</th>
+          <th>枚举ID</th>
+          <th>版本</th>
+          <th>类型定义</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% const enumKeys=Object.keys(Enum); if (enumKeys.length===0) { %>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <% } else { enumKeys.forEach(function(enumId) { %>
+            <tr>
+              <td>
+                <%= Enum[enumId].title || '' %>
+              </td>
+              <td>
+                <%= enumId %>
+              </td>
+              <td>
+                <%= Enum[enumId].version || '' %>
+              </td>
+              <td>
+                <div class="code-block">
+                  <div class="code-header" onclick="toggleCodeBlock(this)">
+                    <span>TypeScript 定义</span>
+                    <span class="code-toggle">▼</span>
+                  </div>
+                  <div class="code-content expanded">
+                    <pre><code><%= Enum[enumId].typescript || '' %></code></pre>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <% }); } %>
+      </tbody>
+    </table>
+
+    <!-- 2.2 实体总览 -->
+    <h2>实体总览</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>实体标题</th>
+          <th>实体ID</th>
+          <th>业务描述</th>
+          <th>技术总结</th>
+          <th>依赖流程</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% const entityKeys=Object.keys(Entity); if (entityKeys.length===0) { %>
+          <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <% } else { entityKeys.forEach(function(entityId) { %>
+            <tr>
+              <td>
+                <%= Entity[entityId].title || '' %>
+              </td>
+              <td>
+                <%= entityId %>
+              </td>
+              <td>
+                <%= Entity[entityId].businessDesc || '' %>
+              </td>
+              <td>
+                <%= Entity[entityId].techSummary || '' %>
+              </td>
+              <td><%- Entity[entityId].dependency ? Entity[entityId].dependency.procedureIds.join('<br>') : '' %></td>
+            </tr>
+            <% }); } %>
+      </tbody>
+    </table>
+
+    <!-- 2.3 实体详情 -->
+    <h2>实体详情</h2>
+    <% Object.keys(Entity).forEach(function(entityId) { %>
+      <h3>
+        <%= Entity[entityId].title || '' %>(<%= entityId %>|ver:<%= Entity[entityId].version || '' %>)
+      </h3>
+      <div class="code-block">
+        <div class="code-header" onclick="toggleCodeBlock(this)">
+          <span>TypeScript 定义</span>
+          <span class="code-toggle">▼</span>
+        </div>
+        <div class="code-content expanded">
+          <pre><code><%= Entity[entityId].typescript || '' %></code></pre>
+        </div>
+      </div>
+      <% }); %>
+
+        <!-- 4. 流程建模部分 -->
+        <h1>模块逻辑详情</h1>
+
+        <% Object.keys(GroupedProcedure).forEach(function(moduleId) { %>
+          <div class="module-section">
+            <h2>
+              <%= Module[moduleId] ? Module[moduleId].title || '' : moduleId %>(<%= moduleId %>|ver:<%= Module[moduleId]
+                    ? Module[moduleId].version || '' : '' %>)
+            </h2>
+
+            <!-- HTTP接口 -->
+            <% if (GroupedProcedure[moduleId].HttpEndpoint) { %>
+              <div class="procedure-section">
+                <h3>HTTP接口</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>接口标题</th>
+                      <th>接口ID</th>
+                      <th>业务描述</th>
+                      <th>技术总结</th>
+                      <th>依赖流程</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% const httpEndpointKeys=Object.keys(GroupedProcedure[moduleId].HttpEndpoint); if
+                      (httpEndpointKeys.length===0) { %>
+                      <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                      </tr>
+                      <% } else { httpEndpointKeys.forEach(function(endpointId) { %>
+                        <tr>
+                          <td>
+                            <%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].title || '' %>
+                          </td>
+                          <td>
+                            <%= endpointId %>
+                          </td>
+                          <td>
+                            <%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].businessDesc || '' %>
+                          </td>
+                          <td>
+                            <%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].techSummary || '' %>
+                          </td>
+                          <td><%- GroupedProcedure[moduleId].HttpEndpoint[endpointId].dependency ?
+                              GroupedProcedure[moduleId].HttpEndpoint[endpointId].dependency.procedureIds.join('<br>')
+                              :
+                              '' %></td>
+                        </tr>
+                        <% }); } %>
+                  </tbody>
+                </table>
+
+                <% Object.keys(GroupedProcedure[moduleId].HttpEndpoint).forEach(function(endpointId) { %>
+                  <h4>
+                    <%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].title || '' %>(<%= endpointId %>|ver:<%=
+                          GroupedProcedure[moduleId].HttpEndpoint[endpointId].version || '' %>)
+                  </h4>
+
+                  <h5>类型定义</h5>
+                  <div class="code-block">
+                    <div class="code-header" onclick="toggleCodeBlock(this)">
+                      <span>TypeScript 类型定义</span>
+                      <span class="code-toggle">▼</span>
+                    </div>
+                    <div class="code-content expanded">
+                      <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].typescript || '' %></code></pre>
+                    </div>
+                  </div>
+
+                  <h5>逻辑流程</h5>
+                  <div class="code-block">
+                    <div class="code-header" onclick="toggleCodeBlock(this)">
+                      <span>控制流伪代码</span>
+                      <span class="code-toggle">▼</span>
+                    </div>
+                    <div class="code-content expanded">
+                      <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].ctrlFlowPseudocode || '' %></code></pre>
+                    </div>
+                  </div>
+
+                  <% if (GroupedProcedure[moduleId].HttpEndpoint[endpointId].rulePseudocode) { %>
+                    <h5>规则</h5>
+                    <div class="code-block">
+                      <div class="code-header" onclick="toggleCodeBlock(this)">
+                        <span>业务规则伪代码</span>
+                        <span class="code-toggle">▼</span>
+                      </div>
+                      <div class="code-content expanded">
+                        <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].rulePseudocode %></code></pre>
+                      </div>
+                    </div>
+                    <% } %>
+
+                      <% if (GroupedProcedure[moduleId].HttpEndpoint[endpointId].dataFlowPseudocode) { %>
+                        <h5>数据流</h5>
+                        <div class="code-block">
+                          <div class="code-header" onclick="toggleCodeBlock(this)">
+                            <span>数据流伪代码</span>
+                            <span class="code-toggle">▼</span>
+                          </div>
+                          <div class="code-content expanded">
+                            <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].dataFlowPseudocode %></code></pre>
+                          </div>
+                        </div>
+                        <% } %>
+
+                          <% }); %>
+              </div>
+              <% } %>
+
+                <!-- 模块间共享流程 -->
+                <% if (GroupedProcedure[moduleId].PublicProcedure) { %>
+                  <div class="procedure-section">
+                    <h3>模块间共享流程</h3>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>流程标题</th>
+                          <th>流程ID</th>
+                          <th>业务描述</th>
+                          <th>技术总结</th>
+                          <th>依赖流程</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% const publicProcedureKeys=Object.keys(GroupedProcedure[moduleId].PublicProcedure); if
+                          (publicProcedureKeys.length===0) { %>
+                          <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                          </tr>
+                          <% } else { publicProcedureKeys.forEach(function(procId) { %>
+                            <tr>
+                              <td>
+                                <%= GroupedProcedure[moduleId].PublicProcedure[procId].title || '' %>
+                              </td>
+                              <td>
+                                <%= procId %>
+                              </td>
+                              <td>
+                                <%= GroupedProcedure[moduleId].PublicProcedure[procId].businessDesc || '' %>
+                              </td>
+                              <td>
+                                <%= GroupedProcedure[moduleId].PublicProcedure[procId].techSummary || '' %>
+                              </td>
+                              <td><%- GroupedProcedure[moduleId].PublicProcedure[procId].dependency ?
+                                  GroupedProcedure[moduleId].PublicProcedure[procId].dependency.procedureIds.join('<br>')
+                                  : '' %></td>
+                            </tr>
+                            <% }); } %>
+                      </tbody>
+                    </table>
+
+                    <% Object.keys(GroupedProcedure[moduleId].PublicProcedure).forEach(function(procId) { %>
+                      <h4>
+                        <%= GroupedProcedure[moduleId].PublicProcedure[procId].title || '' %>(<%= procId %>|ver:<%=
+                              GroupedProcedure[moduleId].PublicProcedure[procId].version || '' %>)
+                      </h4>
+
+                      <h5>类型定义</h5>
+                      <div class="code-block">
+                        <div class="code-header" onclick="toggleCodeBlock(this)">
+                          <span>TypeScript 类型定义</span>
+                          <span class="code-toggle">▼</span>
+                        </div>
+                        <div class="code-content expanded">
+                          <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].typescript || '' %></code></pre>
+                        </div>
+                      </div>
+
+                      <h5>逻辑流程</h5>
+                      <div class="code-block">
+                        <div class="code-header" onclick="toggleCodeBlock(this)">
+                          <span>控制流伪代码</span>
+                          <span class="code-toggle">▼</span>
+                        </div>
+                        <div class="code-content expanded">
+                          <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].ctrlFlowPseudocode || '' %></code></pre>
+                        </div>
+                      </div>
+
+                      <% if (GroupedProcedure[moduleId].PublicProcedure[procId].rulePseudocode) { %>
+                        <h5>规则</h5>
+                        <div class="code-block">
+                          <div class="code-header" onclick="toggleCodeBlock(this)">
+                            <span>业务规则伪代码</span>
+                            <span class="code-toggle">▼</span>
+                          </div>
+                          <div class="code-content expanded">
+                            <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].rulePseudocode %></code></pre>
+                          </div>
+                        </div>
+                        <% } %>
+
+                          <% if (GroupedProcedure[moduleId].PublicProcedure[procId].dataFlowPseudocode) { %>
+                            <h5>数据流</h5>
+                            <div class="code-block">
+                              <div class="code-header" onclick="toggleCodeBlock(this)">
+                                <span>数据流伪代码</span>
+                                <span class="code-toggle">▼</span>
+                              </div>
+                              <div class="code-content expanded">
+                                <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].dataFlowPseudocode %></code></pre>
+                              </div>
+                            </div>
+                            <% } %>
+
+                              <% }); %>
+                  </div>
+                  <% } %>
+
+                    <!-- 模块内私有流程 -->
+                    <% if (GroupedProcedure[moduleId].PrivateProcedure) { %>
+                      <div class="procedure-section">
+                        <h3>模块内私有流程</h3>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>流程标题</th>
+                              <th>流程ID</th>
+                              <th>业务描述</th>
+                              <th>技术总结</th>
+                              <th>依赖流程</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <% const privateProcedureKeys=Object.keys(GroupedProcedure[moduleId].PrivateProcedure); if
+                              (privateProcedureKeys.length===0) { %>
+                              <tr>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                              </tr>
+                              <% } else { privateProcedureKeys.forEach(function(procId) { %>
+                                <tr>
+                                  <td>
+                                    <%= GroupedProcedure[moduleId].PrivateProcedure[procId].title || '' %>
+                                  </td>
+                                  <td>
+                                    <%= procId %>
+                                  </td>
+                                  <td>
+                                    <%= GroupedProcedure[moduleId].PrivateProcedure[procId].businessDesc || '' %>
+                                  </td>
+                                  <td>
+                                    <%= GroupedProcedure[moduleId].PrivateProcedure[procId].techSummary || '' %>
+                                  </td>
+                                  <td><%- GroupedProcedure[moduleId].PrivateProcedure[procId].dependency ?
+                                      GroupedProcedure[moduleId].PrivateProcedure[procId].dependency.procedureIds.join('<br>')
+                                      : '' %></td>
+                                </tr>
+                                <% }); } %>
+                          </tbody>
+                        </table>
+
+                        <% Object.keys(GroupedProcedure[moduleId].PrivateProcedure).forEach(function(procId) { %>
+                          <h4>
+                            <%= GroupedProcedure[moduleId].PrivateProcedure[procId].title || '' %>(<%= procId %>|ver:
+                                <%= GroupedProcedure[moduleId].PrivateProcedure[procId].version || '' %>)
+                          </h4>
+
+                          <h5>类型定义</h5>
+                          <div class="code-block">
+                            <div class="code-header" onclick="toggleCodeBlock(this)">
+                              <span>TypeScript 类型定义</span>
+                              <span class="code-toggle">▼</span>
+                            </div>
+                            <div class="code-content expanded">
+                              <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].typescript || '' %></code></pre>
+                            </div>
+                          </div>
+
+                          <h5>逻辑流程</h5>
+                          <div class="code-block">
+                            <div class="code-header" onclick="toggleCodeBlock(this)">
+                              <span>控制流伪代码</span>
+                              <span class="code-toggle">▼</span>
+                            </div>
+                            <div class="code-content expanded">
+                              <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].ctrlFlowPseudocode || '' %></code></pre>
+                            </div>
+                          </div>
+
+                          <% if (GroupedProcedure[moduleId].PrivateProcedure[procId].rulePseudocode) { %>
+                            <h5>规则</h5>
+                            <div class="code-block">
+                              <div class="code-header" onclick="toggleCodeBlock(this)">
+                                <span>业务规则伪代码</span>
+                                <span class="code-toggle">▼</span>
+                              </div>
+                              <div class="code-content expanded">
+                                <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].rulePseudocode %></code></pre>
+                              </div>
+                            </div>
+                            <% } %>
+
+                              <% if (GroupedProcedure[moduleId].PrivateProcedure[procId].dataFlowPseudocode) { %>
+                                <h5>数据流</h5>
+                                <div class="code-block">
+                                  <div class="code-header" onclick="toggleCodeBlock(this)">
+                                    <span>数据流伪代码</span>
+                                    <span class="code-toggle">▼</span>
+                                  </div>
+                                  <div class="code-content expanded">
+                                    <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].dataFlowPseudocode %></code></pre>
+                                  </div>
+                                </div>
+                                <% } %>
+
+                                  <% }); %>
+                      </div>
+                      <% } %>
+
+          </div>
+          <% }); %>
+
+  </div>
+
+  <script>
+    // 代码块折叠/展开功能
+    function toggleCodeBlock(header) {
+      const codeBlock = header.parentElement;
+      const content = codeBlock.querySelector('.code-content');
+      const toggle = header.querySelector('.code-toggle');
+
+      if (content.classList.contains('expanded')) {
+        // 折叠
+        content.classList.remove('expanded');
+        content.classList.add('collapsed');
+        toggle.classList.add('collapsed');
+        toggle.textContent = '▶';
+      } else {
+        // 展开
+        content.classList.remove('collapsed');
+        content.classList.add('expanded');
+        toggle.classList.remove('collapsed');
+        toggle.textContent = '▼';
+      }
+    }
+
+    // 页面加载完成后，为所有代码块添加默认状态
+    document.addEventListener('DOMContentLoaded', function() {
+      const codeBlocks = document.querySelectorAll('.code-block');
+      codeBlocks.forEach(function(block) {
+        const content = block.querySelector('.code-content');
+        const toggle = block.querySelector('.code-toggle');
+
+        // 默认展开状态
+        content.classList.add('expanded');
+        toggle.textContent = '▼';
+      });
+    });
+  </script>
+</body>
+
+</html>

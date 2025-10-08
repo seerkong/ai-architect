@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket推送测试页面</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .connected {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .disconnected {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .connecting {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .message-area {
+      border: 1px solid #ddd;
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: #f9f9f9;
+    }
+
+    .message {
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .message.heartbeat {
+      background-color: #e8f5e8;
+    }
+
+    .message.sse_data {
+      background-color: #e3f2fd;
+    }
+
+    .message.welcome {
+      background-color: #f3e5f5;
+    }
+
+    .message.error {
+      background-color: #ffebee;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .connect-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .disconnect-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .test-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .stats-btn {
+      background-color: #6f42c1;
+      color: white;
+    }
+
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .stats-area {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>WebSocket推送测试页面</h1>
+
+    <div class="grid">
+      <div>
+        <h3>连接控制</h3>
+        <div class="status disconnected" id="status">
+          未连接
+        </div>
+
+        <div class="input-area">
+          <input type="text" id="projectKey" placeholder="项目键 (例如: test-project)" value="test-project">
+          <button class="connect-btn" id="connectBtn" onclick="connect()">连接</button>
+          <button class="disconnect-btn" id="disconnectBtn" onclick="disconnect()" disabled>断开连接</button>
+        </div>
+
+        <div class="input-area">
+          <button class="test-btn" onclick="testSSE()" disabled id="testBtn">测试SSE推送</button>
+          <button class="stats-btn" onclick="getStats()" id="statsBtn">获取统计信息</button>
+        </div>
+      </div>
+
+      <div>
+        <h3>连接统计</h3>
+        <div class="stats-area" id="statsArea">
+          点击"获取统计信息"查看连接状态
+        </div>
+      </div>
+    </div>
+
+    <h3>消息日志</h3>
+    <div class="message-area" id="messageArea"></div>
+  </div>
+
+  <script>
+    let ws = null;
+    let projectKey = '';
+
+    function updateStatus(status, className) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = status;
+      statusEl.className = `status ${className}`;
+    }
+
+    function addMessage(content, type = 'sse_data') {
+      const messageArea = document.getElementById('messageArea');
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${type}`;
+      messageEl.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${content}`;
+      messageArea.appendChild(messageEl);
+      messageArea.scrollTop = messageArea.scrollHeight;
+    }
+
+    function connect() {
+      projectKey = document.getElementById('projectKey').value.trim();
+      if (!projectKey) {
+        alert('请输入项目键');
+        return;
+      }
+
+      const wsUrl = `ws://localhost:3000/ws/push/${projectKey}`;
+
+      updateStatus('连接中...', 'connecting');
+      addMessage(`正在连接到: ${wsUrl}`, 'sse_data');
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = function() {
+        updateStatus('已连接', 'connected');
+        addMessage('WebSocket推送连接已建立', 'welcome');
+
+        document.getElementById('connectBtn').disabled = true;
+        document.getElementById('disconnectBtn').disabled = false;
+        document.getElementById('testBtn').disabled = false;
+        document.getElementById('projectKey').disabled = true;
+      };
+
+      ws.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          addMessage(`收到推送消息: ${JSON.stringify(data, null, 2)}`, data.type || 'sse_data');
+        } catch (e) {
+          addMessage(`收到原始消息: ${event.data}`, 'sse_data');
+        }
+      };
+
+      ws.onclose = function() {
+        updateStatus('连接已关闭', 'disconnected');
+        addMessage('WebSocket推送连接已关闭', 'sse_data');
+
+        document.getElementById('connectBtn').disabled = false;
+        document.getElementById('disconnectBtn').disabled = true;
+        document.getElementById('testBtn').disabled = true;
+        document.getElementById('projectKey').disabled = false;
+      };
+
+      ws.onerror = function(error) {
+        updateStatus('连接错误', 'disconnected');
+        addMessage(`WebSocket错误: ${error}`, 'error');
+      };
+    }
+
+    function disconnect() {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+    }
+
+    function testSSE() {
+      if (!projectKey) return;
+
+      // 模拟调用ResetInputDocEndpoint
+      fetch('/sse/project/reset-prd-and-tech-constraints', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projectKey: projectKey,
+          prdContent: '测试需求文档内容',
+          prdLink: '',
+          techConstraintsContent: '测试技术约束内容',
+          techConstraintsLink: ''
+        })
+      }).then(response => {
+        addMessage('SSE请求已发送，请查看WebSocket推送消息', 'sse_data');
+      }).catch(error => {
+        addMessage(`SSE请求失败: ${error.message}`, 'error');
+      });
+    }
+
+    function getStats() {
+      const currentProjectKey = document.getElementById('projectKey').value.trim();
+      const url = currentProjectKey ? `/api/ws/stats?projectKey=${currentProjectKey}` : '/api/ws/stats';
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('statsArea').innerHTML =
+            `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+          addMessage('统计信息已更新', 'sse_data');
+        })
+        .catch(error => {
+          addMessage(`获取统计信息失败: ${error.message}`, 'error');
+        });
+    }
+
+    // 自动获取统计信息
+    setInterval(() => {
+      if (document.getElementById('statsBtn').disabled === false) {
+        getStats();
+      }
+    }, 5000);
+  </script>
+</body>
+
+</html>

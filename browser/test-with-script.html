@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>带脚本测试</title>
+  <style>
+    body {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>带脚本测试文档</h1>
+  <p>这个文档包含脚本，应该被移除。</p>
+  <script>
+    console.log("这是一个测试脚本");
+    alert("危险脚本");
+  </script>
+  <table>
+    <tr>
+      <td>表格内容1</td>
+      <td>表格内容2</td>
+    </tr>
+  </table>
+  <script>
+    console.log("应该被移除的脚本");
+  </script>
+  <p>更多内容</p>
+</body>
+
+</html>

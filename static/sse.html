@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI SSE Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #output { 
+      background: #f5f5f5; 
+      padding: 15px; 
+      border-radius: 5px; 
+      min-height: 200px; 
+      max-height: 400px;
+      white-space: pre-wrap;
+      border: 1px solid #ddd;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    #input { 
+      width: 100%; 
+      padding: 10px; 
+      margin: 10px 0; 
+      border: 1px solid #ddd; 
+      border-radius: 5px;
+    }
+    button { 
+      padding: 10px 20px; 
+      background: #007bff; 
+      color: white; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h2>AI SSE Demo</h2>
+  <input type="text" id="input" placeholder="输入你的问题..." value="你好，请介绍一下你自己">
+  <button onclick="startSSE()" id="startBtn">开始对话</button>
+  <button onclick="stopSSE()" id="stopBtn" disabled>停止对话</button>
+  <div id="output">等待输入...</div>
+
+  <script>
+    let evtSource = null;
+
+    function startSSE() {
+      const prompt = document.getElementById('input').value.trim();
+      if (!prompt) {
+        alert('请输入问题');
+        return;
+      }
+
+      // 清空输出
+      document.getElementById('output').textContent = '';
+      
+      // 禁用开始按钮，启用停止按钮
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+
+      // 使用 fetch 发送 POST 请求到 SSE 接口
+      fetch('/api/sse-ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          model: 'Pro/deepseek-ai/DeepSeek-V3'
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        
+        // 创建 ReadableStream 来处理流式响应
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        function readStream() {
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              console.log('Stream finished');
+              document.getElementById('startBtn').disabled = false;
+              document.getElementById('stopBtn').disabled = true;
+              return;
+            }
+            
+            // 解码数据
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6); // 移除 'data: ' 前缀
+                
+                if (data === '[DONE]') {
+                  console.log('Stream completed');
+                  document.getElementById('startBtn').disabled = false;
+                  document.getElementById('stopBtn').disabled = true;
+                  return;
+                }
+                
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.content) {
+                    document.getElementById('output').textContent += parsed.content;
+                    // 自动滚动到底部
+                    const output = document.getElementById('output');
+                    output.scrollTop = output.scrollHeight;
+                  } else if (parsed.error) {
+                    document.getElementById('output').textContent += '\n[错误] ' + parsed.error;
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('stopBtn').disabled = true;
+                    return;
+                  }
+                } catch (e) {
+                  console.log('Non-JSON data:', data);
+                }
+              }
+            }
+            
+            // 继续读取
+            readStream();
+          });
+        }
+        
+        readStream();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('output').textContent += '\n[错误] ' + error.message;
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+      });
+    }
+
+    function stopSSE() {
+      // 停止流式响应
+      if (evtSource) {
+        evtSource.close();
+        evtSource = null;
+      }
+      
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+      document.getElementById('output').textContent += '\n\n[已停止]';
+    }
+
+    // 支持回车键发送
+    document.getElementById('input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !document.getElementById('startBtn').disabled) {
+        startSSE();
+      }
+    });
+  </script>
+</body>
+</html>

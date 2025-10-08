@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI ARCHITECT</title>
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <!-- Object Visualizer CDN -->
+  <script src="https://unpkg.com/object-visualizer"></script>
+  <link rel="stylesheet" href="https://unpkg.com/object-visualizer/dist/index.min.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* 左侧面板 - 技术文档功能 */
+    .left-panel {
+      flex: 2;
+      padding: 8px;
+      border-right: 2px solid #ddd;
+      overflow: hidden;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .left-panel h2 {
+      margin: 0 0 8px 0;
+      color: #333;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 6px;
+      flex-shrink: 0;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 15px;
+      flex-shrink: 0;
+    }
+
+    .button-group button {
+      padding: 6px 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.2s;
+    }
+
+    .button-group button:hover {
+      background: #0056b3;
+    }
+
+    .button-group button:active {
+      background: #004085;
+    }
+
+    #data-input {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      resize: vertical;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Tab区域样式 */
+    .tab-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      height: 0;
+      /* 强制flex子元素计算高度 */
+    }
+
+    .tab-header {
+      display: flex;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+      flex-shrink: 0;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 10px 15px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-button:hover {
+      background-color: #e9ecef;
+      color: #333;
+    }
+
+    .tab-button.active {
+      color: #007bff;
+      border-bottom-color: #007bff;
+      background-color: #fff;
+    }
+
+    .tab-content {
+      flex: 1;
+      display: none;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    #preview-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      flex: 1;
+      min-height: 0;
+    }
+
+    #html-editor {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+    }
+
+    #rich-text-editor {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    /* 右侧面板 - AI聊天功能 */
+    .right-panel {
+      flex: 1;
+      padding: 8px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .right-panel h2 {
+      margin: 0 0 8px 0;
+      color: #333;
+      border-bottom: 2px solid #28a745;
+      padding-bottom: 6px;
+    }
+
+    /* 项目操作区域样式 */
+    .project-actions-section {
+      margin-bottom: 5px;
+      padding: 5px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
+    }
+
+    /* 产品需求输入区域样式 */
+    .prd-input-section {
+      margin-bottom: 2px;
+    }
+
+    .prd-input-group {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 2px;
+    }
+
+    /* PRD链接区域样式 */
+    .prd-link-labels {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+
+    .prd-link-inputs {
+      display: flex;
+      gap: 5px;
+    }
+
+    .prd-link-label {
+      flex: 1;
+      font-weight: 500;
+      color: #333;
+      text-align: center;
+      padding: 2px;
+    }
+
+    .prd-input {
+      flex: 1;
+      padding: 2px 2px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      background: #f9f9f9;
+    }
+
+    .prd-input:focus {
+      outline: none;
+      border-color: #28a745;
+      background: #fff;
+    }
+
+    .prd-textarea-group {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 5px;
+    }
+
+    .prd-textarea {
+      flex: 1;
+      height: 80px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      resize: vertical;
+      background: #f9f9f9;
+    }
+
+    .prd-textarea:focus {
+      outline: none;
+      border-color: #28a745;
+      background: #fff;
+    }
+
+    .project-button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .project-btn {
+      padding: 2px 2px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .project-btn:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+    }
+
+    .project-btn:active {
+      transform: translateY(0);
+      background: #495057;
+    }
+
+    .project-input-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .input-pair {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .input-pair label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #495057;
+      white-space: nowrap;
+      min-width: 50px;
+    }
+
+    .project-input {
+      flex: 1;
+      padding: 5px 8px;
+      border: 1px solid #ced4da;
+      border-radius: 3px;
+      font-size: 12px;
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+
+    .project-input:focus {
+      outline: none;
+      border-color: #28a745;
+      box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .chat-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    #chat-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .chat-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .chat-buttons button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.2s;
+    }
+
+    #startChatBtn {
+      background: #28a745;
+      color: white;
+    }
+
+    #startChatBtn:hover:not(:disabled) {
+      background: #218838;
+    }
+
+    #stopChatBtn {
+      background: #dc3545;
+      color: white;
+    }
+
+    #stopChatBtn:hover:not(:disabled) {
+      background: #c82333;
+    }
+
+    .chat-buttons button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #chat-output {
+      flex: 1;
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+      min-height: 300px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .chat-output-placeholder {
+      color: #666;
+      font-style: italic;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      .left-panel,
+      .right-panel {
+        flex: none;
+        height: 50vh;
+      }
+
+      .left-panel {
+        flex: 2;
+        border-right: none;
+        border-bottom: 2px solid #ddd;
+      }
+
+      .right-panel {
+        flex: 1;
+      }
+
+      .prd-input-group {
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .prd-textarea-group {
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .prd-textarea {
+        height: 40px;
+      }
+
+      .project-button-group {
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .project-btn {
+        width: 100%;
+        text-align: center;
+        padding: 5px 10px;
+      }
+
+      .project-input-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .input-pair {
+        min-width: auto;
+      }
+    }
+
+    /* JSON可视化Tab样式 */
+    .json-tab-button {
+      flex: 1;
+      padding: 8px 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: #666;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .json-tab-button:hover {
+      background-color: #e9ecef;
+      color: #333;
+    }
+
+    .json-tab-button.active {
+      color: #007bff;
+      border-bottom-color: #007bff;
+      background-color: #fff;
+    }
+
+    .json-tab-content {
+      display: none;
+      height: 100%;
+      overflow: auto;
+    }
+
+    .json-tab-content.active {
+      display: block;
+    }
+
+    /* 表格按钮样式 */
+    .table-btn {
+      padding: 6px 12px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.2s;
+      margin-right: 6px;
+    }
+
+    .table-btn:hover {
+      background: #5a6268;
+    }
+
+    .table-btn:active {
+      background: #495057;
+    }
+
+    .table-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Tiptap编辑器样式 */
+    .ProseMirror {
+      outline: none;
+      padding: 10px;
+      min-height: 200px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .ProseMirror p {
+      margin: 0.5em 0;
+    }
+
+    .ProseMirror table {
+      border-collapse: collapse;
+      table-layout: fixed;
+      width: 100%;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    .ProseMirror table td,
+    .ProseMirror table th {
+      min-width: 1em;
+      border: 1px solid #ddd;
+      padding: 3px 5px;
+      vertical-align: top;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .ProseMirror table td>*,
+    .ProseMirror table th>* {
+      margin-bottom: 0;
+    }
+
+    .ProseMirror table th {
+      font-weight: bold;
+      text-align: left;
+      background-color: #f1f3f4;
+    }
+
+    .ProseMirror table .selectedCell:after {
+      z-index: 2;
+      position: absolute;
+      content: "";
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: rgba(200, 200, 255, 0.4);
+      pointer-events: none;
+    }
+
+    .ProseMirror table .column-resize-handle {
+      position: absolute;
+      right: -2px;
+      top: 0;
+      bottom: -2px;
+      width: 4px;
+      background-color: #adf;
+      pointer-events: none;
+    }
+
+    .ProseMirror table p {
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 左侧面板 - 技术文档功能 -->
+  <div class="left-panel">
+    <h2>📝 技术文档工作区</h2>
+    <div class="button-group">
+      <button id="download-tech-doc-html">导出为html</button>
+    </div>
+
+    <!-- JSON可视化区域 -->
+    <div id="json-visualizer-container"
+      style="height: 120px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px; overflow: auto; background: #fff;">
+
+      <!-- JSON可视化Tab头部 -->
+      <div class="json-tab-header" style="display: flex; background-color: #f8f9fa; border-bottom: 1px solid #ddd;">
+        <button class="json-tab-button active" data-json-tab="dsl">技术文档DSL</button>
+        <button class="json-tab-button" data-json-tab="conversation">当前对话变更</button>
+        <button class="json-tab-button" data-json-tab="answer">当前回答变更</button>
+      </div>
+
+      <!-- JSON可视化Tab内容 -->
+      <div class="json-tab-content-container" style="height: calc(100% - 40px); overflow: hidden;">
+        <div class="json-tab-content active" id="dsl-tab">
+          <div id="json-visualizer-app"></div>
+        </div>
+        <div class="json-tab-content" id="conversation-tab">
+          <div id="conversation-mutation-visualizer"></div>
+        </div>
+        <div class="json-tab-content" id="answer-tab">
+          <div id="answer-mutation-visualizer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRD文档链接输入区域 -->
+    <div class="prd-link-section" style="margin-bottom: 15px;">
+      <div class="prd-link-labels">
+        <span class="prd-link-label">PRD文档link</span>
+        <span class="prd-link-label">技术选型约束文档link</span>
+        <span class="prd-link-label">生成技术文档doc链接</span>
+      </div>
+      <div class="prd-link-inputs">
+        <input type="text" id="prd-link" class="prd-input" placeholder="PRD文档link" value="">
+        <input type="text" id="tech-constraints-link" class="prd-input" placeholder="技术选型约束文档link" value="">
+        <input type="text" id="tech-design-doc-link" class="prd-input" placeholder="生成技术文档doc链接" value="">
+      </div>
+    </div>
+
+    <!-- Tab区域 -->
+    <div class="tab-container">
+      <div class="tab-header">
+        <button class="tab-button active" data-tab="rich-text-editor">富文本编辑器</button>
+        <button class="tab-button" data-tab="html-editor">HTML编辑器</button>
+
+        <button class="tab-button" data-tab="tech-constraints">技术约束文档</button>
+        <button class="tab-button" data-tab="source-prd">PRD-原始</button>
+        <button class="tab-button" data-tab="parsed-prd">PRD-转换后</button>
+      </div>
+
+      <div class="tab-content active" id="rich-text-editor-tab">
+        <div id="rich-text-editor"></div>
+      </div>
+
+      <div class="tab-content" id="html-editor-tab">
+        <div id="html-editor"></div>
+      </div>
+
+      <div class="tab-content" id="tech-constraints-tab">
+        <div id="tech-constraints-editor"></div>
+      </div>
+
+      <div class="tab-content" id="source-prd-tab">
+        <div id="source-prd-editor"></div>
+      </div>
+
+      <div class="tab-content" id="parsed-prd-tab">
+        <div id="parsed-prd-editor"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧面板 - AI聊天功能 -->
+  <div class="right-panel">
+    <h2>🤖 AI WEB软件架构师</h2>
+
+    <!-- 项目操作区域 -->
+    <div class="project-actions-section">
+      <div class="project-input-group">
+        <div class="input-pair">
+          <label for="project-key">项目key:</label>
+          <input type="text" id="project-key" class="project-input" placeholder="请输入项目key">
+          <button id="update-websocket" class="project-btn" style="margin-left: 8px; padding: 5px 10px;">更新</button>
+        </div>
+      </div>
+
+      <div class="project-dropdown-group" style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <!-- 模式切换下拉选框 -->
+        <div class="dropdown-container" style="flex: 1;">
+          <label for="mode-switch"
+            style="display: block; font-size: 12px; font-weight: 500; color: #495057; margin-bottom: 4px;">模式切换:</label>
+          <select id="mode-switch" class="project-dropdown"
+            style="width: 100%; padding: 6px 8px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; background: #fff;">
+            <option value="">请选择模式</option>
+            <option value="reset-input-and-init-modules">1 导入需求文档并初始化模块</option>
+            <option value="module-design">2 技术设计</option>
+          </select>
+        </div>
+
+        <!-- 操作按钮组 -->
+        <div class="action-buttons-container" style="flex: 1;">
+          <label
+            style="display: block; font-size: 12px; font-weight: 500; color: #495057; margin-bottom: 4px;">操作:</label>
+          <div class="action-buttons" style="display: flex; gap: 8px;">
+            <button id="update-detail-btn" class="action-btn"
+              style="flex: 1; padding: 6px 12px; border: 1px solid #007bff; border-radius: 3px; font-size: 12px; background: #007bff; color: white; cursor: pointer;">
+              拉取详情
+            </button>
+            <button id="accept-changes-btn" class="action-btn"
+              style="flex: 1; padding: 6px 12px; border: 1px solid #28a745; border-radius: 3px; font-size: 12px; background: #28a745; color: white; cursor: pointer;">
+              接受变更
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="chat-container">
+      <!-- 会话ID输入区域 -->
+      <div class="conversation-id-section" style="margin-bottom: 10px;">
+        <input type="text" id="conversation-id" class="conversation-input" placeholder="会话ID"
+          style="width: 100%; padding: 4px 8px; border: 1px solid #ddd; border-radius: 3px; font-size: 11px; background: #f9f9f9;">
+      </div>
+
+      <div class="chat-input-group">
+        <input type="text" id="chat-input" placeholder="输入你的问题..." value="">
+        <div class="chat-buttons">
+          <button id="startChatBtn">开始</button>
+          <button id="stopChatBtn" disabled>停止</button>
+        </div>
+      </div>
+
+      <div id="chat-output" class="chat-output-placeholder">等待输入...</div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.ts"></script>
+
+  <!-- Vue JSON Visualizer App -->
+  <script>
+    // 等待Vue和ObjectVisualizer加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+      // 使用轮询方式检查ObjectVisualizer是否完全加载
+      function waitForObjectVisualizer() {
+        if (typeof Vue !== 'undefined' &&
+          typeof ObjectVisualizer !== 'undefined' &&
+          ObjectVisualizer.ObjectVisualizer) {
+          initializeVueApp();
+        } else {
+          // 如果还没加载完成，继续等待
+          setTimeout(waitForObjectVisualizer, 100);
+        }
+      }
+
+      function initializeVueApp() {
+        const { createApp } = Vue;
+
+        // Tiptap库检查已禁用，直接初始化Vue应用
+        console.log('初始化Vue应用...');
+
+        // 创建Vue应用
+        const app = createApp({
+          data() {
+            return {
+              dslData: null,
+              conversationMutation: null,
+              answerMutation: null,
+              isLoading: true
+            }
+          },
+          components: {
+            // 动态注册ObjectVisualizer组件
+            ObjectVisualizer: ObjectVisualizer.ObjectVisualizer
+          },
+          mounted() {
+            // 初始化时显示加载状态
+            this.loadDslData();
+          },
+          methods: {
+            loadDslData() {
+              // 这里将从TechDocAIAgentActorApi获取数据
+              // 暂时显示空数据
+              this.dslData = {};
+              this.conversationMutation = null;
+              this.answerMutation = null;
+              this.isLoading = false;
+            },
+            updateDslData(newData) {
+              this.dslData = newData;
+              this.isLoading = false;
+            },
+            updateConversationMutation(newData) {
+              this.conversationMutation = newData;
+            },
+            updateAnswerMutation(newData) {
+              this.answerMutation = newData;
+            }
+          },
+          template: `
+            <div style="height: 100%; padding: 10px; overflow: auto;">
+              <div v-if="isLoading" style="text-align: center; padding: 20px; color: #666;">
+                加载中...
+              </div>
+              <div v-else-if="dslData && Object.keys(dslData).length > 0">
+                <ObjectVisualizer 
+                  :data="dslData" 
+                  rootName="技术文档DSL"
+                  :expandOnCreatedAndUpdated="(path) => path.length <= 2"
+                />
+              </div>
+              <div v-else style="text-align: center; padding: 20px; color: #999;">
+                暂无数据，请先拉取项目详情
+              </div>
+            </div>
+          `
+        });
+
+        // 创建对话变更可视化应用
+        const conversationApp = createApp({
+          data() {
+            return {
+              conversationMutation: null,
+              isLoading: false
+            }
+          },
+          components: {
+            ObjectVisualizer: ObjectVisualizer.ObjectVisualizer
+          },
+          methods: {
+            updateData(newData) {
+              this.conversationMutation = newData;
+            }
+          },
+          template: `
+            <div style="height: 100%; padding: 10px; overflow: auto;">
+              <div v-if="conversationMutation && Object.keys(conversationMutation).length > 0">
+                <ObjectVisualizer 
+                  :data="conversationMutation" 
+                  rootName="对话变更"
+                  :expandOnCreatedAndUpdated="(path) => path.length <= 2"
+                />
+              </div>
+              <div v-else style="text-align: center; padding: 20px; color: #999;">
+                暂无对话变更数据
+              </div>
+            </div>
+          `
+        });
+
+        // 创建回答变更可视化应用
+        const answerApp = createApp({
+          data() {
+            return {
+              answerMutation: null,
+              isLoading: false
+            }
+          },
+          components: {
+            ObjectVisualizer: ObjectVisualizer.ObjectVisualizer
+          },
+          methods: {
+            updateData(newData) {
+              this.answerMutation = newData;
+            }
+          },
+          template: `
+            <div style="height: 100%; padding: 10px; overflow: auto;">
+              <div v-if="answerMutation && Object.keys(answerMutation).length > 0">
+                <ObjectVisualizer 
+                  :data="answerMutation" 
+                  rootName="回答变更"
+                  :expandOnCreatedAndUpdated="(path) => path.length <= 2"
+                />
+              </div>
+              <div v-else style="text-align: center; padding: 20px; color: #999;">
+                暂无回答变更数据
+              </div>
+            </div>
+          `
+        });
+
+        // 挂载Vue应用
+        const vm = app.mount('#json-visualizer-app');
+        const conversationVm = conversationApp.mount('#conversation-mutation-visualizer');
+        const answerVm = answerApp.mount('#answer-mutation-visualizer');
+
+        // 将Vue应用实例和组件实例暴露到全局，以便其他代码可以调用
+        window.jsonVisualizerApp = {
+          app: app,
+          updateDslData: (newData) => {
+            vm.updateDslData(newData);
+          },
+          updateConversationMutation: (newData) => {
+            conversationVm.updateData(newData);
+          },
+          updateAnswerMutation: (newData) => {
+            answerVm.updateData(newData);
+          }
+        };
+
+        // 添加JSON tab切换功能
+        function initJsonTabSwitching() {
+          const tabButtons = document.querySelectorAll('.json-tab-button');
+          const tabContents = document.querySelectorAll('.json-tab-content');
+
+          tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+              const tabName = button.getAttribute('data-json-tab');
+
+              // 移除所有active类
+              tabButtons.forEach(btn => btn.classList.remove('active'));
+              tabContents.forEach(content => content.classList.remove('active'));
+
+              // 添加active类到当前tab
+              button.classList.add('active');
+              document.getElementById(tabName + '-tab').classList.add('active');
+            });
+          });
+        }
+
+        // 初始化tab切换
+        initJsonTabSwitching();
+
+        // 初始化富文本编辑器
+        initializeRichTextEditor();
+      }
+
+      // 富文本编辑器实例
+      let richTextEditor = null;
+
+      function initializeRichTextEditor() {
+        // 暂时直接使用简化编辑器，避免Tiptap CDN问题
+        console.log('使用简化富文本编辑器');
+        initializeSimpleEditor();
+      }
+
+      function initializeSimpleEditor() {
+        // 创建简化的富文本编辑器
+        const { createApp } = Vue;
+        const richTextApp = createApp({
+          data() {
+            return {
+              htmlContent: '',
+              editorElement: null
+            }
+          },
+          mounted() {
+            this.initEditor();
+          },
+          methods: {
+            initEditor() {
+              // 创建contenteditable div
+              const editorDiv = document.createElement('div');
+              editorDiv.contentEditable = true;
+              editorDiv.style.cssText = `
+                height: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background: #fff;
+                outline: none;
+                overflow: auto;
+                font-family: Arial, sans-serif;
+                line-height: 1.5;
+              `;
+
+              // 将编辑器添加到Vue应用的容器中
+              const container = document.getElementById('simple-editor-container');
+              if (container) {
+                container.appendChild(editorDiv);
+              } else {
+                // 如果容器不存在，则添加到rich-text-editor
+                document.getElementById('rich-text-editor').appendChild(editorDiv);
+              }
+              this.editorElement = editorDiv;
+            },
+            setContent(htmlContent) {
+              this.htmlContent = htmlContent;
+              if (this.editorElement) {
+                this.editorElement.innerHTML = htmlContent;
+              }
+            },
+          },
+          template: `
+            <div style="height: 100%; display: flex; flex-direction: column;">
+              <div style="flex: 1; overflow: auto;" id="simple-editor-container">
+              </div>
+            </div>
+          `
+        });
+
+        // 挂载简化编辑器
+        const richTextVm = richTextApp.mount('#rich-text-editor');
+        richTextEditor = richTextVm;
+
+        // 暴露到全局
+        window.richTextEditor = {
+          setContent: (htmlContent) => {
+            richTextVm.setContent(htmlContent);
+          },
+          getContent: () => {
+            return richTextVm.htmlContent;
+          },
+          updateHtmlContent: (htmlContent) => {
+            richTextVm.setContent(htmlContent);
+          }
+        };
+      }
+
+      // 开始等待ObjectVisualizer加载
+      waitForObjectVisualizer();
+    });
+
+  </script>
+</body>
+
+</html>
