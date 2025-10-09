@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extended Form Components Test</title>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .debug-info {
+      background: #f5f7fa;
+      padding: 15px;
+      margin: 20px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      border: 1px solid #e4e7ed;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .debug-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #303133;
+    }
+    
+    .form-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #303133;
+      margin-bottom: 30px;
+    }
+    
+    h2 {
+      color: #409eff;
+      border-bottom: 2px solid #409eff;
+      padding-bottom: 5px;
+      margin: 30px 0 20px 0;
+    }
+    
+    h3 {
+      color: #606266;
+      margin: 20px 0 10px 0;
+    }
+  </style>
+
+  <script type="module">
+    import { createApp, reactive, h, computed, watchEffect, watch, ref, renderSlot, defineComponent, inject, onUnmounted } from 'vue'
+    import { computedAsync, toReactive } from '@vueuse/core'
+    import { Render, RenderWithState, useConfigProvider, ConfigProvider, processProps } from 'el-lowcode'
+    import { createRender } from '@el-lowcode/render'
+    import { useRequest } from '@el-lowcode/utils'
+    import { ExtendedFormDemo } from './dsldemo/ExtendedFormDemo'
+
+    const schema = computedAsync(() => {
+      return ExtendedFormDemo;
+    })
+
+    // 创建_Render实例
+    const _Render = createRender({ processProps })
+
+    // 创建响应式的表单数据
+    const formData = reactive({})
+    
+    // 存储el-lowcode的vars引用
+    let elLowcodeVars = null
+
+    const loading = h('h1', { style: 'margin-top: 45vh; text-align: center;' }, 'Loading……')
+
+    // 使用el-lowcode提供的RenderWithState组件
+    let renderWithStateRef = null
+
+    createApp(() => {
+      console.log('Main app render called')
+      
+      // 创建响应式的JSON显示
+      const formDataJson = computed(() => JSON.stringify(formData, null, 2))
+      
+      // 添加打印按钮
+      const printFormData = () => {
+        if (renderWithStateRef && renderWithStateRef.getCurrentState) {
+          const currentState = renderWithStateRef.getCurrentState() || {};
+          const currentFormData = currentState.formData || {};
+          console.log('Current form data from RenderWithState:', currentFormData)
+          alert('当前表单数据:\n' + JSON.stringify(currentFormData, null, 2))
+        } else {
+          console.log('Current form data from reactive:', formData)
+          alert('当前表单数据:\n' + JSON.stringify(formData, null, 2))
+        }
+      }
+      
+      return h('div', [
+        h('h1', '扩展表单组件测试'),
+        
+        h('div', { class: 'debug-info' }, [
+          h('div', { class: 'debug-title' }, '实时表单数据:'),
+          h('pre', formDataJson.value)
+        ]),
+        
+        h('div', { style: 'text-align: center; margin: 20px;' }, [
+          h('button', {
+            onClick: printFormData,
+            style: 'padding: 10px 20px; background-color: #409eff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;'
+          }, '打印当前表单数据'),
+          h('button', {
+            onClick: () => {
+              console.log('Testing RenderWithState API...')
+              if (renderWithStateRef) {
+                console.log('renderWithStateRef available:', renderWithStateRef)
+                console.log('Available methods:', Object.keys(renderWithStateRef))
+                if (renderWithStateRef.getCurrentState) {
+                  const currentData = renderWithStateRef.getCurrentState() || {};
+                  const currentFormData = currentData.formData || {};
+                  console.log('Current state data via getCurrentState:', currentData)
+                  alert('当前表单数据 (via RenderWithState):\n' + JSON.stringify(currentFormData, null, 2))
+                }
+              } else {
+                console.log('renderWithStateRef not available')
+                alert('renderWithStateRef not available')
+              }
+            },
+            style: 'padding: 10px 20px; background-color: #67c23a; color: white; border: none; border-radius: 4px; cursor: pointer;'
+          }, '测试RenderWithState API')
+        ]),
+        
+        h('div', { class: 'form-container' }, [
+          schema.value ? h(RenderWithState, { 
+            ref: (ref) => { renderWithStateRef = ref },
+            schema: schema.value,
+            onStateChange: (newState) => {
+              console.log('state data changed:', newState)
+              if (newState) {
+                Object.assign(formData, newState.formData || {})
+                console.log('Local formData updated:', formData)
+              }
+            }
+          }) : loading
+        ])
+      ])
+    })
+      .mount(document.body)
+  </script>
+</head>
+
+<body>
+
+</body>
+
+</html>

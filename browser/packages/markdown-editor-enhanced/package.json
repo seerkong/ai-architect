@@ -1,0 +1,12 @@
+{
+  "name": "markdown-editor-enhanced",
+  "version": "1.0.0",
+  "description": "Enhanced Markdown Editor with edit/preview/split modes",
+  "main": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "vue": "^3.3.0",
+    "wc-mdit": "^0.0.6"
+  }
+}
+

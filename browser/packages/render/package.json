@@ -1,0 +1,21 @@
+{
+  "name": "@el-lowcode/render",
+  "private": false,
+  "version": "1.0.3",
+  "type": "module",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "types": "./index.ts"
+    }
+  },
+  "dependencies": {
+    "@vue/shared": "^3.2.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.2.0"
+  }
+}

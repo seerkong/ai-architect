@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Table Test</title>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+
+  <script type="module">
+    import { createApp, reactive, h, computed, watchEffect } from 'vue'
+    import { computedAsync } from '@vueuse/core'
+    import { Render } from 'el-lowcode'
+    import { TableDemo } from './dsldemo/TableDemo'
+
+    const schema = computedAsync(() => {
+      return TableDemo;
+    })
+
+    watchEffect(() => {
+      console.log(schema.value)
+    })
+
+    const loading = h('h1', { style: 'margin-top: 45vh; text-align: center;' }, 'Loading……')
+
+    createApp(() => schema.value
+      ? h(Render, { schema: schema.value }, { loading: () => loading })
+      : loading
+    )
+      .mount(document.body)
+  </script>
+</head>
+
+<body>
+
+</body>
+
+</html>

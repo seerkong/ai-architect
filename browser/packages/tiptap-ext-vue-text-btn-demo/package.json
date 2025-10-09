@@ -1,0 +1,46 @@
+{
+  "name": "tiptap-ext-vue-text-btn-demo",
+  "description": "Vue component with button and editable content for tiptap",
+  "version": "1.0.0",
+  "homepage": "https://tiptap.dev",
+  "keywords": [
+    "tiptap",
+    "tiptap extension",
+    "vue",
+    "prosemirror",
+    "custom node"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "devDependencies": {
+    "@tiptap/core": "workspace:^",
+    "@tiptap/vue-3": "workspace:^",
+    "vue": "^3.4.0"
+  },
+  "peerDependencies": {
+    "@tiptap/core": "workspace:^",
+    "@tiptap/vue-3": "workspace:^",
+    "vue": "^3.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ueberdosis/tiptap",
+    "directory": "packages/prosemirror-ext-vue-text-btn-demo"
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "prettier ./src/ --check && eslint --cache --quiet --no-error-on-unmatched-pattern ./src/"
+  }
+}

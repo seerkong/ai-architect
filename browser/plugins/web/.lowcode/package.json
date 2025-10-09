@@ -1,0 +1,8 @@
+{
+  "name": "web",
+  "displayName": "Web",
+  "description": "一些基础组件",
+  "icon": "https://api.iconify.design/skill-icons:html.svg",
+  "homepage": "https://gitee.com/httpsgiteecomepalserver/el-lowcode/tree/main/public/plugins/web",
+  "author": "xxx"
+}

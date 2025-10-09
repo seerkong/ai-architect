@@ -10,7 +10,6 @@ declare global {
     richTextEditor?: {
       setContent: (htmlContent: string) => void;
       getContent: () => string;
-      updateHtmlContent?: (htmlContent: string) => void;
     };
   }
 }

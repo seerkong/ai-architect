@@ -165,7 +165,14 @@
       height: 100%;
       flex: 1;
       min-height: 0;
-      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Tiptap 编辑器全局样式 */
+    #rich-text-editor .ProseMirror {
+      background: #fff;
     }
 
     /* 右侧面板 - AI聊天功能 */
@@ -747,6 +754,185 @@
 
   <script type="module" src="./src/main.ts"></script>
 
+  <!-- Tiptap 富文本编辑器初始化 -->
+  <script>
+    // 先设置占位符，防止在编辑器初始化前访问报错
+    window.richTextEditor = {
+      setContent: (htmlContent) => {
+        console.warn('富文本编辑器正在初始化中...');
+      },
+      getContent: () => {
+        console.warn('富文本编辑器正在初始化中...');
+        return '';
+      }
+    };
+  </script>
+  <script type="module">
+    import { createApp, nextTick, h } from 'vue';
+    import { TiptapEditorCapsule } from './packages/tiptap-capsule/src/index.ts';
+    
+    // 等待 DOM 加载完成
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 使用 ESM 导入的 Vue，确保与 TiptapEditorCapsule 使用同一个 Vue 实例
+      console.log('开始初始化 Tiptap 编辑器...');
+      
+      // 创建 Tiptap 编辑器 Vue 应用
+      const richTextApp = createApp({
+        data() {
+          return {
+            htmlContent: '',
+            editorRef: null
+          }
+        },
+        mounted() {
+          // 编辑器挂载后的初始化逻辑
+          console.log('Tiptap 编辑器已挂载');
+          console.log('编辑器 ref:', this.$refs.tiptapEditor);
+          // 等待下一个 tick 后再检查
+          this.$nextTick(() => {
+            if (this.$refs.tiptapEditor && this.$refs.tiptapEditor.editor) {
+              console.log('Tiptap editor 实例已就绪');
+            } else {
+              console.warn('Tiptap editor 实例未就绪');
+            }
+            
+            // 调试：输出容器尺寸信息
+            const container = document.getElementById('rich-text-editor');
+            if (container) {
+              console.log('rich-text-editor 容器尺寸:', {
+                width: container.offsetWidth,
+                height: container.offsetHeight,
+                display: window.getComputedStyle(container).display,
+                flexDirection: window.getComputedStyle(container).flexDirection
+              });
+            }
+            
+            const editorEl = container?.querySelector('.tiptap-editor-capsule');
+            if (editorEl) {
+              console.log('tiptap-editor-capsule 尺寸:', {
+                width: editorEl.offsetWidth,
+                height: editorEl.offsetHeight
+              });
+            }
+            
+            const proseMirrorEl = container?.querySelector('.ProseMirror');
+            if (proseMirrorEl) {
+              console.log('ProseMirror 尺寸:', {
+                width: proseMirrorEl.offsetWidth,
+                height: proseMirrorEl.offsetHeight
+              });
+            } else {
+              console.warn('ProseMirror 元素未找到');
+            }
+            
+            // 检查 heightMode class
+            const capsule = container?.querySelector('.tiptap-editor-capsule');
+            if (capsule) {
+              console.log('编辑器 class:', capsule.className);
+              console.log('是否包含 height-mode-fixed:', capsule.classList.contains('height-mode-fixed'));
+            }
+            
+            // 检查 editor-wrapper 的滚动设置
+            const editorWrapper = container?.querySelector('.editor-wrapper');
+            if (editorWrapper) {
+              const styles = window.getComputedStyle(editorWrapper);
+              console.log('editor-wrapper 样式:', {
+                flex: styles.flex,
+                overflowY: styles.overflowY,
+                minHeight: styles.minHeight,
+                height: styles.height,
+                offsetHeight: editorWrapper.offsetHeight
+              });
+            }
+            
+            // 检查 editor-content 的设置
+            const editorContent = container?.querySelector('.editor-content');
+            if (editorContent) {
+              const styles = window.getComputedStyle(editorContent);
+              console.log('editor-content 样式:', {
+                height: styles.height,
+                offsetHeight: editorContent.offsetHeight
+              });
+            }
+          });
+        },
+        methods: {
+          async setContent(htmlContent) {
+            console.log('setContent 被调用，内容长度:', htmlContent.length);
+            this.htmlContent = htmlContent;
+            
+            // 等待编辑器 ref 就绪（最多等待 2 秒）
+            let attempts = 0;
+            const maxAttempts = 20;
+            while (!this.$refs.tiptapEditor && attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 100));
+              attempts++;
+            }
+            
+            if (this.$refs.tiptapEditor) {
+              console.log('调用 setHTML，内容预览:', htmlContent.substring(0, 100));
+              this.$refs.tiptapEditor.setHTML(htmlContent);
+              console.log('富文本编辑器内容已设置');
+              // 验证内容是否真的被设置
+              await this.$nextTick();
+              const currentContent = this.$refs.tiptapEditor.getHTML();
+              console.log('当前编辑器内容长度:', currentContent.length);
+            } else {
+              console.warn('TiptapEditor ref 在 2 秒内未就绪');
+            }
+          },
+          getContent() {
+            if (this.$refs.tiptapEditor) {
+              return this.$refs.tiptapEditor.getHTML();
+            }
+            return '';
+          }
+        },
+        // 使用 render 函数替代 template 字符串
+        render() {
+          return h('div', {
+            style: 'width: 100%; height: 100%; display: flex; flex-direction: column;'
+          }, [
+            h(TiptapEditorCapsule, {
+              ref: 'tiptapEditor',
+              modelValue: this.htmlContent,
+              'onUpdate:modelValue': (value) => {
+                this.htmlContent = value;
+              },
+              enableVueTextBtnDemo: false,
+              enableBubbleMenu: true,
+              editable: true,
+              showToolbar: true,
+              showOutput: false,
+              heightMode: 'fixed',  // 固定高度模式，编辑区域可滚动
+              style: 'flex: 1; overflow: hidden;'
+            })
+          ]);
+        }
+      });
+
+      // 挂载 Tiptap 编辑器
+      const richTextVm = richTextApp.mount('#rich-text-editor');
+
+      // 等待组件完全挂载和渲染
+      await nextTick();
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // 暴露到全局，以便其他代码可以调用
+      window.richTextEditor = {
+        setContent: (htmlContent) => {
+          richTextVm.setContent(htmlContent);
+        },
+        getContent: () => {
+          return richTextVm.getContent();
+        }
+      };
+
+      console.log('Tiptap 富文本编辑器初始化完成');
+      console.log('window.richTextEditor 已暴露到全局');
+    });
+  </script>
+
   <!-- Vue JSON Visualizer App -->
   <script>
     // 等待Vue和ObjectVisualizer加载完成
@@ -940,9 +1126,8 @@
       let richTextEditor = null;
 
       function initializeRichTextEditor() {
-        // 暂时直接使用简化编辑器，避免Tiptap CDN问题
-        console.log('使用简化富文本编辑器');
-        initializeSimpleEditor();
+        // Tiptap 编辑器已在页面的 module script 中初始化
+        console.log('Tiptap 富文本编辑器将在 DOMContentLoaded 时自动初始化');
       }
 
       function initializeSimpleEditor() {
@@ -1011,9 +1196,6 @@
           },
           getContent: () => {
             return richTextVm.htmlContent;
-          },
-          updateHtmlContent: (htmlContent) => {
-            richTextVm.setContent(htmlContent);
           }
         };
       }

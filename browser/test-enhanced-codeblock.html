@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>增强代码块测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: #3b82f6;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .content {
+      padding: 20px;
+    }
+    
+    .output-container {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .output-section {
+      margin-bottom: 15px;
+    }
+    
+    .output-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .output-section h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #374151;
+    }
+    
+    .output-section pre {
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #e5e7eb;
+      overflow-x: auto;
+      font-size: 12px;
+      line-height: 1.4;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>增强代码块功能测试</h1>
+      <p>测试代码块的语言切换、语法高亮和复制功能</p>
+    </div>
+    
+    <div class="content">
+      <div id="app">
+        <tiptap-editor-capsule
+          v-model="content"
+          :show-output="true"
+          @html-present-changed="handleHtmlChanged"
+          @json-present-changed="handleJsonChanged"
+        />
+      </div>
+      
+      <div class="output-container">
+        <div class="output-section">
+          <h3>HTML 输出:</h3>
+          <pre>{{ htmlOutput }}</pre>
+        </div>
+        <div class="output-section">
+          <h3>JSON 输出:</h3>
+          <pre>{{ jsonOutput }}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createApp, h, ref } from 'vue'
+    import { TiptapEditorCapsule } from './packages/tiptap-capsule/src/index.ts'
+
+    // 创建Vue应用
+    const app = createApp({
+      setup() {
+        const editorRef = ref()
+        const content = ref(`
+          <h1>增强代码块测试</h1>
+          <p>点击工具栏中的代码块按钮插入代码块，然后测试以下功能：</p>
+          <ul>
+            <li>语言切换</li>
+            <li>语法高亮</li>
+            <li>复制代码</li>
+            <li>删除代码块</li>
+          </ul>
+          <p>请插入一个代码块并测试功能。</p>
+          
+          <!-- 测试旧代码块兼容性 -->
+          <code>console.log('这是旧的代码块格式');</code>
+        `)
+        
+        const htmlOutput = ref('')
+        const jsonOutput = ref('')
+
+        // 处理HTML变化
+        const handleHtmlChange = (html) => {
+          htmlOutput.value = html
+        }
+
+        // 处理JSON变化
+        const handleJsonChange = (json) => {
+          jsonOutput.value = JSON.stringify(json, null, 2)
+        }
+
+        return {
+          editorRef,
+          content,
+          htmlOutput,
+          jsonOutput,
+          handleHtmlChange,
+          handleJsonChange
+        }
+      },
+      render() {
+        return h('div', [
+          h('h1', '增强代码块功能测试'),
+          h('p', '测试代码块的语言切换、语法高亮和复制功能'),
+          
+          h(TiptapEditorCapsule, {
+            ref: this.editorRef,
+            modelValue: this.content,
+            'onUpdate:modelValue': (value) => {
+              this.content = value
+            },
+            enableVueTextBtnDemo: false,
+            onHtmlPresentChanged: this.handleHtmlChange,
+            onJsonPresentChanged: this.handleJsonChange
+          }),
+          
+          h('div', { class: 'output-container' }, [
+            h('div', { class: 'output-section' }, [
+              h('h3', 'HTML 输出:'),
+              h('pre', this.htmlOutput)
+            ]),
+            h('div', { class: 'output-section' }, [
+              h('h3', 'JSON 输出:'),
+              h('pre', this.jsonOutput)
+            ])
+          ])
+        ])
+      }
+    })
+
+    // 挂载Vue应用
+    app.mount('#app')
+  </script>
+</body>
+</html>

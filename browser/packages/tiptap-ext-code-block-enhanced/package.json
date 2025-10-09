@@ -1,0 +1,23 @@
+{
+  "name": "tiptap-ext-code-block-enhanced",
+  "version": "1.0.0",
+  "description": "Enhanced TipTap Code Block extension with language support and syntax highlighting",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@tiptap/core": "^2.1.0",
+    "@tiptap/vue-3": "^2.1.0",
+    "highlight.js": "^11.9.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vue": "^3.3.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "tiptap-ext-vue-mermaid",
+  "version": "1.0.0",
+  "description": "TipTap Vue Mermaid plugin with edit and view modes",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@tiptap/core": "^2.1.0",
+    "@tiptap/vue-3": "^2.1.0",
+    "mermaid": "^10.6.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vue": "^3.3.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  }
+}

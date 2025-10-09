@@ -1,0 +1,22 @@
+{
+  "name": "@el-lowcode/utils",
+  "private": false,
+  "version": "0.0.2",
+  "type": "module",
+  "main": "./index.ts",
+  "module": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "types": "./index.ts"
+    }
+  },
+  "dependencies": {
+    "pretty-bytes": "^6.1.1"
+  },
+  "peerDependencies": {
+    "element-plus": "^2.3.8",
+    "vue": "^3.2.0"
+  }
+}

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiptap & MarkdownIt 表单测试</title>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .debug-info {
+      background: #f5f7fa;
+      padding: 15px;
+      margin: 20px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      border: 1px solid #e4e7ed;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .debug-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #303133;
+    }
+    
+    .form-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #303133;
+      margin-bottom: 30px;
+    }
+    
+    h2 {
+      color: #409eff;
+      border-bottom: 2px solid #409eff;
+      padding-bottom: 5px;
+      margin: 30px 0 20px 0;
+    }
+    
+    h3 {
+      color: #606266;
+      margin: 20px 0 10px 0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .button-group button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .button-group button:hover {
+      opacity: 0.8;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background-color: #409eff;
+      color: white;
+    }
+
+    .btn-success {
+      background-color: #67c23a;
+      color: white;
+    }
+
+    .btn-warning {
+      background-color: #e6a23c;
+      color: white;
+    }
+
+    .btn-danger {
+      background-color: #f56c6c;
+      color: white;
+    }
+
+    .btn-info {
+      background-color: #909399;
+      color: white;
+    }
+
+    .section-divider {
+      border-top: 2px solid #e4e7ed;
+      margin: 30px 0;
+    }
+
+    .feature-description {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .feature-description h4 {
+      margin: 0 0 10px 0;
+      color: #0369a1;
+    }
+
+    .feature-description p {
+      margin: 0;
+      color: #0c4a6e;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
+
+  <script type="module">
+    import { createApp, reactive, h, computed, watchEffect, watch, ref, renderSlot, defineComponent, inject, onUnmounted } from 'vue'
+    import { computedAsync, toReactive } from '@vueuse/core'
+    import { Render, RenderWithState, useConfigProvider, ConfigProvider, processProps } from 'el-lowcode'
+    import { createRender } from '@el-lowcode/render'
+    import { useRequest } from '@el-lowcode/utils'
+    import { TiptapMarkdownFormDemo } from './dsldemo/TiptapMarkdownFormDemo'
+
+    const schema = computedAsync(() => {
+      return TiptapMarkdownFormDemo;
+    })
+
+    // 创建_Render实例
+    const _Render = createRender({ processProps })
+
+    // 创建响应式的表单数据
+    const formData = reactive({})
+    
+    // 存储el-lowcode的vars引用
+    let elLowcodeVars = null
+
+    const loading = h('h1', { style: 'margin-top: 45vh; text-align: center;' }, 'Loading……')
+
+    // 使用el-lowcode提供的RenderWithState组件
+    let renderWithStateRef = null
+
+    createApp(() => {
+      console.log('Main app render called')
+      
+      // 创建响应式的JSON显示
+      const formDataJson = computed(() => JSON.stringify(formData, null, 2))
+      
+      // 添加调试信息
+      console.log('Schema value:', schema.value)
+      console.log('FormData reactive:', formData)
+      
+      // 打印当前表单数据的函数
+      const printFormData = () => {
+        if (renderWithStateRef && renderWithStateRef.getCurrentState) {
+          const currentState = renderWithStateRef.getCurrentState() || {};
+          const currentFormData = currentState.formData || {};
+          console.log('Current form data from RenderWithState:', currentFormData)
+          alert('当前表单数据:\n' + JSON.stringify(currentFormData, null, 2))
+        } else {
+          console.log('Current form data from reactive:', formData)
+          alert('当前表单数据:\n' + JSON.stringify(formData, null, 2))
+        }
+      }
+
+      // 打印富文本内容的函数
+      const printRichContent = () => {
+        if (renderWithStateRef && renderWithStateRef.getCurrentState) {
+          const currentState = renderWithStateRef.getCurrentState() || {};
+          const richContent = currentState.formData?.richContent || '';
+          console.log('Rich content:', richContent)
+          alert('富文本内容:\n' + (richContent || '暂无内容'))
+        }
+      }
+
+      // 打印Markdown内容的函数
+      const printMarkdownContent = () => {
+        if (renderWithStateRef && renderWithStateRef.getCurrentState) {
+          const currentState = renderWithStateRef.getCurrentState() || {};
+          const markdownContent = currentState.formData?.markdownContent || '';
+          console.log('Markdown content:', markdownContent)
+          alert('Markdown内容:\n' + (markdownContent || '暂无内容'))
+        }
+      }
+
+      // 清空表单数据的函数
+      const clearFormData = () => {
+        if (renderWithStateRef && renderWithStateRef.getCurrentState) {
+          const currentState = renderWithStateRef.getCurrentState() || {};
+          if (currentState.formData) {
+            Object.keys(currentState.formData).forEach(key => {
+              currentState.formData[key] = '';
+            });
+          }
+          alert('表单数据已清空')
+        }
+      }
+
+      // 重置表单数据的函数
+      const resetFormData = () => {
+        if (renderWithStateRef && renderWithStateRef.getCurrentState) {
+          const currentState = renderWithStateRef.getCurrentState() || {};
+          if (currentState.formData) {
+            Object.assign(currentState.formData, {
+              "title": "",
+              "author": "",
+              "richContent": "",
+              "markdownContent": "# 欢迎使用Markdown编辑器\n\n这是一个**示例Markdown内容**，支持：\n\n- 列表项\n- 代码块\n- 链接\n- 图片\n\n```javascript\nconsole.log('Hello World!');\n```\n\n[查看更多](https://www.example.com)",
+              "articleType": "blog",
+              "tags": ["vue", "javascript"],
+              "status": "draft",
+              "pinned": false
+            });
+          }
+          alert('表单数据已重置为默认值')
+        }
+      }
+      
+      return h('div', [
+        h('h1', 'Tiptap 富文本编辑器 & MarkdownIt 渲染器测试'),
+        
+        h('div', { class: 'feature-description' }, [
+          h('h4', '功能说明'),
+          h('p', '本测试页面集成了Tiptap富文本编辑器和MarkdownIt渲染器，支持：'),
+          h('ul', [
+            h('li', 'Tiptap富文本编辑器 - 支持格式化、表格、链接、图片等'),
+            h('li', 'MarkdownIt渲染器 - 支持Markdown语法实时预览'),
+            h('li', '表单数据双向绑定 - 实时同步编辑器内容到表单数据'),
+            h('li', '多种数据打印方式 - 支持整体和单项数据查看')
+          ])
+        ]),
+        
+        h('div', { class: 'debug-info' }, [
+          h('div', { class: 'debug-title' }, '实时表单数据:'),
+          h('pre', formDataJson.value)
+        ]),
+        
+        h('div', { class: 'button-group' }, [
+          h('button', {
+            onClick: printFormData,
+            class: 'btn-primary'
+          }, '打印当前表单数据'),
+          h('button', {
+            onClick: printRichContent,
+            class: 'btn-success'
+          }, '打印富文本内容'),
+          h('button', {
+            onClick: printMarkdownContent,
+            class: 'btn-warning'
+          }, '打印Markdown内容'),
+          h('button', {
+            onClick: clearFormData,
+            class: 'btn-danger'
+          }, '清空表单数据'),
+          h('button', {
+            onClick: resetFormData,
+            class: 'btn-info'
+          }, '重置表单数据')
+        ]),
+
+        h('div', { class: 'section-divider' }),
+        
+        h('div', { class: 'form-container' }, [
+          schema.value ? h(RenderWithState, { 
+            ref: (ref) => { renderWithStateRef = ref },
+            schema: schema.value,
+            onStateChange: (newState) => {
+              console.log('state data changed:', newState)
+              if (newState) {
+                Object.assign(formData, newState.formData || {})
+                console.log('Local formData updated:', formData)
+              }
+            }
+          }) : loading
+        ])
+      ])
+    })
+      .mount(document.body)
+  </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
