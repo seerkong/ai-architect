@@ -38,16 +38,23 @@ export function downloadTechDocHtml(mesh: AiWebArchitectMesh, runtime: TechDocEd
 
 // ===== Monaco Editor初始化 =====
 export async function initMonacoEditor(mesh: AiWebArchitectMesh, runtime: TechDocEditorRuntime) {
-  let monacoEditor = runtime.data.techDocEditor;
-  let currentHtmlContent = runtime.data.techDocHtmlContent;
-  if (monacoEditor) {
+  if (runtime.data.techDocEditor) {
     return; // 已经初始化过了
+  }
+  
+  if (runtime.data.initializingTechDocEditor) {
+    console.log('HTML编辑器正在初始化中，跳过');
+    return;
   }
 
   const editorElement = document.getElementById('html-editor');
   if (!editorElement) return;
 
   console.log('initMonacoEditor enter');
+  runtime.data.initializingTechDocEditor = true;
+  
+  let currentHtmlContent = runtime.data.techDocHtmlContent;
+  let monacoEditor: any = null;
 
   // 确保容器有明确的高度
   editorElement.style.height = '100%';
@@ -67,6 +74,7 @@ export async function initMonacoEditor(mesh: AiWebArchitectMesh, runtime: TechDo
       wordWrap: 'on'
     });
     runtime.data.techDocEditor = monacoEditor;
+    runtime.data.initializingTechDocEditor = false; // 清除初始化标志
 
     // 监听内容变化
     monacoEditor.onDidChangeModelContent(() => {
@@ -89,6 +97,7 @@ export async function initMonacoEditor(mesh: AiWebArchitectMesh, runtime: TechDo
       }
     }, 100);
   } catch (error) {
+    runtime.data.initializingTechDocEditor = false; // 出错时也要清除标志
     console.error('Failed to initialize Monaco Editor:', error);
   }
 }
@@ -170,15 +179,22 @@ export async function importHtmlToEditor(mesh: AiWebArchitectMesh, runtime: Tech
 
 // ===== 技术约束文档编辑器初始化 =====
 export async function initTechConstraintsEditor(mesh: AiWebArchitectMesh, runtime: TechDocEditorRuntime) {
-  let techConstraintsEditor = runtime.data.techConstraintsEditor;
-  if (techConstraintsEditor) {
+  if (runtime.data.techConstraintsEditor) {
     return; // 已经初始化过了
+  }
+  
+  if (runtime.data.initializingTechConstraintsEditor) {
+    console.log('技术约束编辑器正在初始化中，跳过');
+    return;
   }
 
   const editorElement = document.getElementById('tech-constraints-editor');
   if (!editorElement) return;
 
   console.log('initTechConstraintsEditor enter');
+  runtime.data.initializingTechConstraintsEditor = true;
+  
+  let techConstraintsEditor: any = null;
 
   // 确保容器有明确的高度
   editorElement.style.height = '100%';
@@ -198,6 +214,7 @@ export async function initTechConstraintsEditor(mesh: AiWebArchitectMesh, runtim
       wordWrap: 'on'
     });
     runtime.data.techConstraintsEditor = techConstraintsEditor;
+    runtime.data.initializingTechConstraintsEditor = false; // 清除初始化标志
 
     // 监听内容变化
     techConstraintsEditor.onDidChangeModelContent(() => {
@@ -220,21 +237,36 @@ export async function initTechConstraintsEditor(mesh: AiWebArchitectMesh, runtim
       }
     }, 100);
   } catch (error) {
+    runtime.data.initializingTechConstraintsEditor = false; // 出错时也要清除标志
     console.error('Failed to initialize Tech Constraints Editor:', error);
   }
 }
 
 // ===== 原始PRD编辑器初始化 =====
 export async function initSourcePRDEditor(mesh: AiWebArchitectMesh, runtime: TechDocEditorRuntime) {
-  let sourcePRDEditor = runtime.data.sourcePRDEditor;
-  if (sourcePRDEditor) {
-    return; // 已经初始化过了
+  // 检查是否已经初始化或正在初始化
+  if (runtime.data.sourcePRDEditor) {
+    console.log('PRD-原始编辑器已经初始化过了，跳过');
+    return;
+  }
+  
+  if (runtime.data.initializingSourcePRDEditor) {
+    console.log('PRD-原始编辑器正在初始化中，跳过');
+    return;
   }
 
   const editorElement = document.getElementById('source-prd-editor');
-  if (!editorElement) return;
+  if (!editorElement) {
+    console.error('source-prd-editor 容器未找到！');
+    return;
+  }
 
-  console.log('initSourcePRDEditor enter');
+  console.log('initSourcePRDEditor enter，容器:', editorElement);
+  
+  // 设置正在初始化标志
+  runtime.data.initializingSourcePRDEditor = true;
+  
+  let sourcePRDEditor: any = null;
 
   // 确保容器有明确的高度
   editorElement.style.height = '100%';
@@ -246,19 +278,25 @@ export async function initSourcePRDEditor(mesh: AiWebArchitectMesh, runtime: Tec
 
     sourcePRDEditor = monaco.editor.create(editorElement, {
       value: runtime.data.sourcePRDContent,
-      language: 'html',
-      theme: 'vs-dark',
+      language: 'markdown',
+      theme: 'vs',
       automaticLayout: true,
       minimap: { enabled: false },
       scrollBeyondLastLine: false,
       wordWrap: 'on'
     });
     runtime.data.sourcePRDEditor = sourcePRDEditor;
+    runtime.data.initializingSourcePRDEditor = false; // 清除初始化标志
+    
+    console.log('PRD-原始编辑器已创建并保存到 runtime.data.sourcePRDEditor');
+    console.log('初始内容长度:', sourcePRDEditor.getValue().length);
 
     // 监听内容变化
     sourcePRDEditor.onDidChangeModelContent(() => {
       if (sourcePRDEditor) {
-        runtime.data.sourcePRDContent = sourcePRDEditor.getValue();
+        const newContent = sourcePRDEditor.getValue();
+        runtime.data.sourcePRDContent = newContent;
+        console.log('PRD-原始编辑器内容已变化，新长度:', newContent.length);
       }
     });
 
@@ -276,21 +314,29 @@ export async function initSourcePRDEditor(mesh: AiWebArchitectMesh, runtime: Tec
       }
     }, 100);
   } catch (error) {
+    runtime.data.initializingSourcePRDEditor = false; // 出错时也要清除标志
     console.error('Failed to initialize Source PRD Editor:', error);
   }
 }
 
 // ===== 转换后PRD编辑器初始化 =====
 export async function initParsedPRDEditor(mesh: AiWebArchitectMesh, runtime: TechDocEditorRuntime) {
-  let parsedPRDEditor = runtime.data.parsedPRDEditor;
-  if (parsedPRDEditor) {
+  if (runtime.data.parsedPRDEditor) {
     return; // 已经初始化过了
+  }
+  
+  if (runtime.data.initializingParsedPRDEditor) {
+    console.log('PRD-转换后编辑器正在初始化中，跳过');
+    return;
   }
 
   const editorElement = document.getElementById('parsed-prd-editor');
   if (!editorElement) return;
 
   console.log('initParsedPRDEditor enter');
+  runtime.data.initializingParsedPRDEditor = true;
+  
+  let parsedPRDEditor: any = null;
 
   // 确保容器有明确的高度
   editorElement.style.height = '100%';
@@ -310,6 +356,7 @@ export async function initParsedPRDEditor(mesh: AiWebArchitectMesh, runtime: Tec
       wordWrap: 'on'
     });
     runtime.data.parsedPRDEditor = parsedPRDEditor;
+    runtime.data.initializingParsedPRDEditor = false; // 清除初始化标志
 
     // 监听内容变化
     parsedPRDEditor.onDidChangeModelContent(() => {
@@ -332,6 +379,7 @@ export async function initParsedPRDEditor(mesh: AiWebArchitectMesh, runtime: Tec
       }
     }, 100);
   } catch (error) {
+    runtime.data.initializingParsedPRDEditor = false; // 出错时也要清除标志
     console.error('Failed to initialize Parsed PRD Editor:', error);
   }
 }

@@ -305,6 +305,9 @@ ${techDocContent}
       patch = extractMutationPatch(message.content);
       confirmItems = extractConfirmForm(message.content);
     }
+    if (Object.keys(patch).length === 0) {
+      console.error("------ai resonpse structured data is empty, full content is:\n", message.content);
+    }
 
     // 返回结构化结果
     console.log("------ai resonpse structured data:\n", JSON.stringify(patch, null, 2));

@@ -36,6 +36,7 @@
     "@vue/shared": "^3.5.22",
     "@vueuse/core": "^10.11.1",
     "@vueuse/router": "^10.11.1",
+    "dockview-core": "^4.9.0",
     "ejs": "^3.1.10",
     "element-plus": "^2.11.4",
     "hexoid": "^2.0.0",

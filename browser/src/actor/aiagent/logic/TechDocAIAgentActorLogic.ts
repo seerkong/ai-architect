@@ -13,17 +13,87 @@ export class TechDocAIAgentActorLogic implements TechDocAIAgentActorApi {
 
   constructor(
     private mesh: AiWebArchitectMesh) {
-    this.runtime = this.init();
+    this.runtime = this.initRuntime();
     this.privateLogic = new TechDocAIAgentPrivateLogic(this.mesh, this.runtime, this);
     this.pushWsManager = new ProjectPushWsManager();
     this.setupWebSocketCallbacks();
+  }
+
+  async mount(): Promise<void> {
+    console.log('TechDocAIAgentActorLogic: 开始初始化JSON可视化组件...');
+    
+    // 初始化3个JSON可视化组件
+    await this.initJsonVisualizer('dsl');
+    await this.initJsonVisualizer('conversation');
+    await this.initJsonVisualizer('answer');
+    
+    console.log('TechDocAIAgentActorLogic: JSON可视化组件初始化完成');
+  }
+
+  // 初始化JSON可视化组件
+  private async initJsonVisualizer(type: 'dsl' | 'conversation' | 'answer'): Promise<void> {
+    const mountEl = document.getElementById(`${type}-visualizer-mount`);
+    if (!mountEl) {
+      console.warn(`${type}-visualizer-mount 未找到`);
+      return;
+    }
+
+    const app = (window as any).Vue.createApp({
+      data() {
+        return {
+          data: null,
+          isLoading: type === 'dsl'
+        };
+      },
+      components: {
+        ObjectVisualizer: (window as any).ObjectVisualizer.ObjectVisualizer
+      },
+      methods: {
+        updateData(newData: any) {
+          (this as any).data = newData;
+          (this as any).isLoading = false;
+        }
+      },
+      template: `
+        <div style="height: 100%; padding: 8px; overflow: auto;">
+          <div v-if="isLoading" style="text-align: center; padding: 10px; color: #888;">
+            加载中...
+          </div>
+          <div v-else-if="data && Object.keys(data).length > 0">
+            <ObjectVisualizer 
+              :data="data" 
+              :rootName="${type === 'dsl' ? '技术文档DSL' : type === 'conversation' ? '对话变更' : '回答变更'}"
+              :expandOnCreatedAndUpdated="(path) => path.length <= 2"
+            />
+          </div>
+          <div v-else style="text-align: center; padding: 10px; color: #999;">
+            暂无数据
+          </div>
+        </div>
+      `
+    });
+
+    const vm = app.mount(mountEl);
+
+    // 暴露到全局
+    const globalApp = (window as any).jsonVisualizerApp || {};
+    if (type === 'dsl') {
+      globalApp.updateDslData = (data: any) => vm.updateData(data);
+    } else if (type === 'conversation') {
+      globalApp.updateConversationMutation = (data: any) => vm.updateData(data);
+    } else if (type === 'answer') {
+      globalApp.updateAnswerMutation = (data: any) => vm.updateData(data);
+    }
+    (window as any).jsonVisualizerApp = globalApp;
+
+    console.log(`JSON可视化组件已初始化: ${type}`);
   }
 
   getTechDocDsl(): TechDesignSnapshotDsl {
     return this.runtime.data.techDocDsl;
   }
 
-  init(): TechDocAIAgentRuntime {
+  initRuntime(): TechDocAIAgentRuntime {
     return {
       data: {
         chatReader: null,

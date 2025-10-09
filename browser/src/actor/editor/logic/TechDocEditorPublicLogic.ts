@@ -24,7 +24,7 @@ export function initRuntime(mesh: AiWebArchitectMesh): TechDocEditorRuntime {
 export async function connect(
   mesh: AiWebArchitectMesh, runtime: TechDocEditorRuntime): Promise<void> {
   
-    const downloadTechDocHtmlBtn = <HTMLButtonElement>document.getElementById('download-tech-doc-html');
+    const downloadTechDocHtmlBtn = <HTMLButtonElement>document.getElementById('export-html-menu');
   if (downloadTechDocHtmlBtn) {
     downloadTechDocHtmlBtn.onclick = () => PrivateLogic.downloadTechDocHtml(
       mesh, runtime

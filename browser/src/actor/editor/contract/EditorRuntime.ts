@@ -21,4 +21,10 @@ export interface EditorData {
   sourcePRDContent: string;
   // 变化后后PRD内容
   transformedPRDContent: string;
+  
+  // 初始化标志，防止重复初始化
+  initializingTechDocEditor?: boolean;
+  initializingTechConstraintsEditor?: boolean;
+  initializingSourcePRDEditor?: boolean;
+  initializingParsedPRDEditor?: boolean;
 }

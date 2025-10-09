@@ -198,7 +198,6 @@
         <tr>
           <th>模块标题</th>
           <th>模块ID</th>
-          <th>版本</th>
           <th>业务描述</th>
           <th>技术总结</th>
           <th>依赖模块</th>
@@ -212,7 +211,6 @@
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td>&nbsp;</td>
           </tr>
           <% } else { moduleKeys.forEach(function(moduleId) { %>
             <tr>
@@ -221,9 +219,6 @@
               </td>
               <td>
                 <%= moduleId %>
-              </td>
-              <td>
-                <%= Module[moduleId].version || '' %>
               </td>
               <td>
                 <%= Module[moduleId].businessDesc || '' %>
@@ -247,14 +242,12 @@
         <tr>
           <th>枚举标题</th>
           <th>枚举ID</th>
-          <th>版本</th>
           <th>类型定义</th>
         </tr>
       </thead>
       <tbody>
         <% const enumKeys=Object.keys(Enum); if (enumKeys.length===0) { %>
           <tr>
-            <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
@@ -268,18 +261,8 @@
                 <%= enumId %>
               </td>
               <td>
-                <%= Enum[enumId].version || '' %>
-              </td>
-              <td>
-                <div class="code-block">
-                  <div class="code-header" onclick="toggleCodeBlock(this)">
-                    <span>TypeScript 定义</span>
-                    <span class="code-toggle">▼</span>
-                  </div>
-                  <div class="code-content expanded">
-                    <pre><code><%= Enum[enumId].typescript || '' %></code></pre>
-                  </div>
-                </div>
+                <pre><code><%= Enum[enumId].typescript || '' %></code></pre>
+                
               </td>
             </tr>
             <% }); } %>
@@ -321,7 +304,7 @@
               <td>
                 <%= Entity[entityId].techSummary || '' %>
               </td>
-              <td><%- Entity[entityId].dependency ? Entity[entityId].dependency.procedureIds.join('<br>') : '' %></td>
+              <td><%- Entity[entityId].dependency ? Entity[entityId].dependency.entityIds.join('<br>') : '' %></td>
             </tr>
             <% }); } %>
       </tbody>
@@ -333,15 +316,7 @@
       <h3>
         <%= Entity[entityId].title || '' %>(<%= entityId %>|ver:<%= Entity[entityId].version || '' %>)
       </h3>
-      <div class="code-block">
-        <div class="code-header" onclick="toggleCodeBlock(this)">
-          <span>TypeScript 定义</span>
-          <span class="code-toggle">▼</span>
-        </div>
-        <div class="code-content expanded">
-          <pre><code><%= Entity[entityId].typescript || '' %></code></pre>
-        </div>
-      </div>
+      <pre><code><%= Entity[entityId].typescript || '' %></code></pre>
       <% }); %>
 
         <!-- 4. 流程建模部分 -->
@@ -408,51 +383,22 @@
                   </h4>
 
                   <h5>类型定义</h5>
-                  <div class="code-block">
-                    <div class="code-header" onclick="toggleCodeBlock(this)">
-                      <span>TypeScript 类型定义</span>
-                      <span class="code-toggle">▼</span>
-                    </div>
-                    <div class="code-content expanded">
-                      <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].typescript || '' %></code></pre>
-                    </div>
-                  </div>
+                  <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].typescript || '' %></code></pre>
+
 
                   <h5>逻辑流程</h5>
-                  <div class="code-block">
-                    <div class="code-header" onclick="toggleCodeBlock(this)">
-                      <span>控制流伪代码</span>
-                      <span class="code-toggle">▼</span>
-                    </div>
-                    <div class="code-content expanded">
-                      <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].ctrlFlowPseudocode || '' %></code></pre>
-                    </div>
-                  </div>
+                  <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].ctrlFlowPseudocode || '' %></code></pre>
 
                   <% if (GroupedProcedure[moduleId].HttpEndpoint[endpointId].rulePseudocode) { %>
-                    <h5>规则</h5>
-                    <div class="code-block">
-                      <div class="code-header" onclick="toggleCodeBlock(this)">
-                        <span>业务规则伪代码</span>
-                        <span class="code-toggle">▼</span>
-                      </div>
-                      <div class="code-content expanded">
-                        <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].rulePseudocode %></code></pre>
-                      </div>
-                    </div>
+                    <h5>业务规则伪代码</h5>
+                    <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].rulePseudocode %></code></pre>
+                 
                     <% } %>
 
                       <% if (GroupedProcedure[moduleId].HttpEndpoint[endpointId].dataFlowPseudocode) { %>
                         <h5>数据流</h5>
-                        <div class="code-block">
-                          <div class="code-header" onclick="toggleCodeBlock(this)">
-                            <span>数据流伪代码</span>
-                            <span class="code-toggle">▼</span>
-                          </div>
-                          <div class="code-content expanded">
-                            <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].dataFlowPseudocode %></code></pre>
-                          </div>
-                        </div>
+                        <pre><code><%= GroupedProcedure[moduleId].HttpEndpoint[endpointId].dataFlowPseudocode %></code></pre>
+
                         <% } %>
 
                           <% }); %>
@@ -512,51 +458,22 @@
                       </h4>
 
                       <h5>类型定义</h5>
-                      <div class="code-block">
-                        <div class="code-header" onclick="toggleCodeBlock(this)">
-                          <span>TypeScript 类型定义</span>
-                          <span class="code-toggle">▼</span>
-                        </div>
-                        <div class="code-content expanded">
-                          <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].typescript || '' %></code></pre>
-                        </div>
-                      </div>
+                      <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].typescript || '' %></code></pre>
 
                       <h5>逻辑流程</h5>
-                      <div class="code-block">
-                        <div class="code-header" onclick="toggleCodeBlock(this)">
-                          <span>控制流伪代码</span>
-                          <span class="code-toggle">▼</span>
-                        </div>
-                        <div class="code-content expanded">
-                          <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].ctrlFlowPseudocode || '' %></code></pre>
-                        </div>
-                      </div>
+                      <<pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].ctrlFlowPseudocode || '' %></code></pre>
+
 
                       <% if (GroupedProcedure[moduleId].PublicProcedure[procId].rulePseudocode) { %>
                         <h5>规则</h5>
-                        <div class="code-block">
-                          <div class="code-header" onclick="toggleCodeBlock(this)">
-                            <span>业务规则伪代码</span>
-                            <span class="code-toggle">▼</span>
-                          </div>
-                          <div class="code-content expanded">
-                            <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].rulePseudocode %></code></pre>
-                          </div>
-                        </div>
+                        <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].rulePseudocode %></code></pre>
+
                         <% } %>
 
                           <% if (GroupedProcedure[moduleId].PublicProcedure[procId].dataFlowPseudocode) { %>
                             <h5>数据流</h5>
-                            <div class="code-block">
-                              <div class="code-header" onclick="toggleCodeBlock(this)">
-                                <span>数据流伪代码</span>
-                                <span class="code-toggle">▼</span>
-                              </div>
-                              <div class="code-content expanded">
-                                <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].dataFlowPseudocode %></code></pre>
-                              </div>
-                            </div>
+                            <pre><code><%= GroupedProcedure[moduleId].PublicProcedure[procId].dataFlowPseudocode %></code></pre>
+
                             <% } %>
 
                               <% }); %>
@@ -616,51 +533,23 @@
                           </h4>
 
                           <h5>类型定义</h5>
-                          <div class="code-block">
-                            <div class="code-header" onclick="toggleCodeBlock(this)">
-                              <span>TypeScript 类型定义</span>
-                              <span class="code-toggle">▼</span>
-                            </div>
-                            <div class="code-content expanded">
-                              <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].typescript || '' %></code></pre>
-                            </div>
-                          </div>
+                          <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].typescript || '' %></code></pre>
+
 
                           <h5>逻辑流程</h5>
-                          <div class="code-block">
-                            <div class="code-header" onclick="toggleCodeBlock(this)">
-                              <span>控制流伪代码</span>
-                              <span class="code-toggle">▼</span>
-                            </div>
-                            <div class="code-content expanded">
-                              <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].ctrlFlowPseudocode || '' %></code></pre>
-                            </div>
-                          </div>
+                          <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].ctrlFlowPseudocode || '' %></code></pre>
+
 
                           <% if (GroupedProcedure[moduleId].PrivateProcedure[procId].rulePseudocode) { %>
                             <h5>规则</h5>
-                            <div class="code-block">
-                              <div class="code-header" onclick="toggleCodeBlock(this)">
-                                <span>业务规则伪代码</span>
-                                <span class="code-toggle">▼</span>
-                              </div>
-                              <div class="code-content expanded">
-                                <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].rulePseudocode %></code></pre>
-                              </div>
-                            </div>
+                            <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].rulePseudocode %></code></pre>
+
                             <% } %>
 
                               <% if (GroupedProcedure[moduleId].PrivateProcedure[procId].dataFlowPseudocode) { %>
                                 <h5>数据流</h5>
-                                <div class="code-block">
-                                  <div class="code-header" onclick="toggleCodeBlock(this)">
-                                    <span>数据流伪代码</span>
-                                    <span class="code-toggle">▼</span>
-                                  </div>
-                                  <div class="code-content expanded">
-                                    <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].dataFlowPseudocode %></code></pre>
-                                  </div>
-                                </div>
+                                <pre><code><%= GroupedProcedure[moduleId].PrivateProcedure[procId].dataFlowPseudocode %></code></pre>
+  
                                 <% } %>
 
                                   <% }); %>

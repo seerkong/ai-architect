@@ -934,18 +934,18 @@ export default {
 
     /* 工具栏按钮通用样式 */
     .toolbar-group button {
-      padding: 6px 10px;
+      padding: 2px 4px;
       border: 1px solid #d1d5db;
-      border-radius: 4px;
+      border-radius: 2px;
       background: white;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      font-size: 13px;
-      min-height: 32px;
-      min-width: 32px;
+      gap: 2px;
+      font-size: 11px;
+      min-height: 20px;
+      min-width: 20px;
     }
 
     .toolbar-group button:hover:not(:disabled) {
@@ -994,14 +994,14 @@ export default {
 }
 
 .toolbar-select {
-  padding: 6px 8px;
+  padding: 2px 3px;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 2px;
   background: white;
   cursor: pointer;
-  font-size: 13px;
-  min-height: 32px;
-  min-width: 60px;
+  font-size: 11px;
+  min-height: 20px;
+  min-width: 40px;
 }
 
 .toolbar-select:hover {

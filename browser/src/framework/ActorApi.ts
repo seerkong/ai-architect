@@ -1,4 +1,4 @@
 export interface ActorApi<T = any> {
-  // init(): T;
+  mount(): Promise<void>;
   connect(): Promise<void>;
 }
