@@ -1,0 +1,117 @@
+{
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.format.enable": true,
+  "typescript.format.insertSpaceAfterCommaDelimiter": true,
+  "typescript.format.insertSpaceAfterSemicolonInForStatements": true,
+  "typescript.format.insertSpaceBeforeAndAfterBinaryOperators": true,
+  "typescript.format.insertSpaceAfterConstructor": false,
+  "typescript.format.insertSpaceAfterKeywordsInControlFlowStatements": true,
+  "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": false,
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true,
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": false,
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": false,
+  "typescript.format.insertSpaceAfterTypeAssertion": false,
+  "typescript.format.insertSpaceBeforeFunctionParenthesis": false,
+  "typescript.format.placeOpenBraceOnNewLineForFunctions": false,
+  "typescript.format.placeOpenBraceOnNewLineForControlBlocks": false,
+  "javascript.format.enable": true,
+  "javascript.format.insertSpaceAfterCommaDelimiter": true,
+  "javascript.format.insertSpaceAfterSemicolonInForStatements": true,
+  "javascript.format.insertSpaceBeforeAndAfterBinaryOperators": true,
+  "javascript.format.insertSpaceAfterConstructor": false,
+  "javascript.format.insertSpaceAfterKeywordsInControlFlowStatements": true,
+  "javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": false,
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true,
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": false,
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": false,
+  "javascript.format.insertSpaceAfterTypeAssertion": false,
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": false,
+  "javascript.format.placeOpenBraceOnNewLineForFunctions": false,
+  "javascript.format.placeOpenBraceOnNewLineForControlBlocks": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": false,
+  "editor.codeActionsOnSave": {},
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.rulers": [
+    80,
+    120
+  ],
+  "editor.wordWrap": "bounded",
+  "editor.wordWrapColumn": 120,
+  "files.associations": {
+    "*.ejs": "html",
+    "*.env*": "dotenv"
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.git": true,
+    "**/pnpm-lock.yaml": true,
+    "**/package-lock.json": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/pnpm-lock.yaml": true,
+    "**/package-lock.json": true
+  },
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "javascript": "html"
+  },
+  "emmet.triggerExpansionOnTab": true,
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "debug.console.fontSize": 14,
+  "debug.console.lineHeight": 22,
+  "debug.inlineValues": true,
+  "debug.showBreakpointsInOverviewRuler": true,
+  "debug.showInlineBreakpointCandidates": true,
+  "eslint.workingDirectories": [
+    "server",
+    "client"
+  ],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "prettier.configPath": "",
+  "prettier.ignorePath": ".prettierignore",
+  "prettier.requireConfig": false,
+  "prettier.useEditorConfig": false,
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "tsconfig*.json"
+      ],
+      "url": "https://json.schemastore.org/tsconfig"
+    },
+    {
+      "fileMatch": [
+        "package.json"
+      ],
+      "url": "https://json.schemastore.org/package"
+    }
+  ]
+}

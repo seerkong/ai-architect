@@ -1,0 +1,95 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "启动 Server (npm dev)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/node_modules/.bin/ts-node-dev",
+      "args": [
+        "--respawn",
+        "--transpile-only",
+        "-r",
+        "tsconfig-paths/register",
+        "--inspect=9229",
+        "src/index.ts"
+      ],
+      "cwd": "${workspaceFolder}/server",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "envFile": "${workspaceFolder}/server/env.dev",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal",
+      "restart": true,
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "调试 Server (ts-node)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/src/index.ts",
+      "cwd": "${workspaceFolder}/server",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "envFile": "${workspaceFolder}/server/config.dev.toml",
+      "runtimeArgs": [
+        "--require",
+        "ts-node/register",
+        "--require",
+        "tsconfig-paths/register"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "restart": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "调试当前 TypeScript 文件",
+      "type": "node",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}/server",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "envFile": "${workspaceFolder}/server/config.dev.toml",
+      "runtimeArgs": [
+        "--require",
+        "ts-node/register",
+        "--require",
+        "tsconfig-paths/register"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal",
+      "sourceMaps": true
+    },
+    {
+      "name": "附加到 Node 进程",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}/server",
+      "remoteRoot": "${workspaceFolder}/server",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}
