@@ -8,7 +8,7 @@
     "build": "tsc && npm run copy-assets",
     "copy-assets": "cp -r src/aiagent/prompt dist/aiagent/",
     "start": "node -r tsconfig-paths/register dist/index.js",
-    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register --inspect=9229 src/index.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

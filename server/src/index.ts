@@ -78,15 +78,15 @@ router.get('/api/ws/stats', async (ctx) => {
 });
 
 const ssePostEndpoints: { [key: string]: ReqRespEndpoint } = {}
-ssePostEndpoints[SSE_URL_RESET_INPUT_AND_INIT_MODULES] = new ResetInputAndInitModulesEndpoint(logger);
-ssePostEndpoints[SSE_URL_MODULE_DESIGN] = new ModuleDesignEndpoint(logger);
+ssePostEndpoints[SSE_URL_RESET_INPUT_AND_INIT_MODULES] = ResetInputAndInitModulesEndpoint.handle;
+ssePostEndpoints[SSE_URL_MODULE_DESIGN] = ModuleDesignEndpoint.handle;
 
 const noSSEPostEndpoints: { [key: string]: ReqRespEndpoint } = {}
-noSSEPostEndpoints[API_URL_PROJECT_UPSERT] = new ProjectUpsertEndpoint(logger);
-noSSEPostEndpoints[API_URL_PROJECT_DETAIL] = new ProjectDetailEndpoint(logger);
-noSSEPostEndpoints[API_URL_PROJECT_ACCEPT_CHANGES] = new AcceptChangeEndpoint(logger);
-noSSEPostEndpoints[API_URL_FETCH_DOC_CONTENT] = new FetchDocContentEndpoint(logger);
-noSSEPostEndpoints[API_URL_UPDATE_TECH_DOC_DSL] = new UpdateTechDocDslEndpoint(logger);
+noSSEPostEndpoints[API_URL_PROJECT_UPSERT] = ProjectUpsertEndpoint.handle;
+noSSEPostEndpoints[API_URL_PROJECT_DETAIL] = ProjectDetailEndpoint.handle;
+noSSEPostEndpoints[API_URL_PROJECT_ACCEPT_CHANGES] = AcceptChangeEndpoint.handle;
+noSSEPostEndpoints[API_URL_FETCH_DOC_CONTENT] = FetchDocContentEndpoint.handle;
+noSSEPostEndpoints[API_URL_UPDATE_TECH_DOC_DSL] = UpdateTechDocDslEndpoint.handle;
 
 
 // 流式响应post接口
@@ -103,7 +103,7 @@ for (const [path, endpoint] of Object.entries(ssePostEndpoints)) {
     ctx.set('Transfer-Encoding', 'chunked');
     const httpCtx = new KoaHttpCtx(ctx);
     try {
-      await endpoint.handle(httpCtx, ctx.request);
+      await endpoint(httpCtx, ctx.request);
     } catch (error: any) {
       logger.error('SSE error:', error);
       ctx.res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
@@ -117,7 +117,7 @@ for (const [path, endpoint] of Object.entries(noSSEPostEndpoints)) {
   router.post(path, async (ctx) => {
     const httpCtx = new KoaHttpCtx(ctx);
     try {
-      await endpoint.handle(httpCtx, ctx.request);
+      await endpoint(httpCtx, ctx.request);
     } catch (error: any) {
       logger.error('post API error:', error);
       httpCtx.response(500, {

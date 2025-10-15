@@ -14,17 +14,14 @@ import path from "path";
 import { ReqRespEndpoint } from "../../http/HttpEndpoint";
 import { ProjectEntityType, ProjectStatus, ResetInputAndInitModulesRequest, SSEChatData, SSEChatEventType } from "@shared/contract";
 
-export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
-  constructor(
-    private logger: Logger) { }
-
+export class ResetInputAndInitModulesEndpoint {
   /**
    * 同时发送SSE和WebSocket消息
    * @param httpCtx HTTP上下文
    * @param projectKey 项目键
    * @param sseData SSE数据
    */
-  private emitSSEAndPush(httpCtx: HttpCtx, projectKey: string, sseData: SSEChatData): void {
+  private static emitSSEAndPush(httpCtx: HttpCtx, projectKey: string, sseData: SSEChatData): void {
     // 发送SSE消息
     httpCtx.emitData(JSON.stringify(sseData));
 
@@ -32,7 +29,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
     ProjectPushWs.pushToProject(projectKey, sseData);
   }
 
-  public async handle(
+  public static async handle(
     httpCtx: HttpCtx,
     request: any
   ) {
@@ -50,9 +47,9 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
     if (typedRequest.prdLink != null && typedRequest.prdLink.trim().length > 0) {
       try {
         accessToken = await getAccessTokenPublic();
-        this.logger.info('成功获取访问令牌，将用于所有API调用');
+        httpCtx.logger.info('成功获取访问令牌，将用于所有API调用');
       } catch (error) {
-        this.logger.error('获取访问令牌失败:', error);
+        httpCtx.logger.error('获取访问令牌失败:', error);
         httpCtx.emitErrorAndEnd(JSON.stringify({
           error: "获取访问令牌失败"
         }));
@@ -112,10 +109,10 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
     let prdContentAfterTransform = prdContent;
     // 开启需求文档转换
     if (typedRequest.enablePrdTransform) {
-      this.logger.info(`开始进行需求文档图片识别等转换!`);
+      httpCtx.logger.info(`开始进行需求文档图片识别等转换!`);
       prdContentAfterTransform = await this.transformPrdContent(
         httpCtx,
-        this.logger,
+        httpCtx.logger,
         typedRequest.cookie || '',
         conversationAndMsgResult,
         prdDocId,
@@ -147,7 +144,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
   }
 
 
-  private async initModules(
+  private static async initModules(
     httpCtx: HttpCtx,
     projectService: typeof ProjectService,
     conversationService: typeof ConversationService,
@@ -158,7 +155,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
     // 构造agent运行时
     let agentRuntime: ArchitectAgentRuntime = await makeAgentRuntime(
       httpCtx,
-      this.logger,
+      httpCtx.logger,
       conversationAndMsgResult,
       dbSnapshot,
       []
@@ -219,7 +216,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
   }
 
 
-  private async transformPrdContent(
+  private static async transformPrdContent(
     httpCtx: HttpCtx,
     logger: Logger,
     cookie: string,
@@ -249,7 +246,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
     return replaceImgSlotsWithText(markImgSlotText, slotKeyToImgReplaceText);
   }
 
-  private async getImgUrlAndReplaceText(
+  private static async getImgUrlAndReplaceText(
     runtime: ImgRecognitionAgentRuntime,
     docId: string,
     slotKeyToImgUrl: { [key: string]: string },
@@ -272,7 +269,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
   }
 
   // 批量下载图片
-  private async batchDownloadImages(
+  private static async batchDownloadImages(
     runtime: ImgRecognitionAgentRuntime,
     docId: string,
     slotKeyToImgUrl: { [key: string]: string },
@@ -363,7 +360,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
   }
 
   // 批量理解图片
-  private async batchRecognizeImages(
+  private static async batchRecognizeImages(
     runtime: ImgRecognitionAgentRuntime,
     downloadResults: { [key: string]: { success: boolean; imagePath?: string; error?: string; originalUrl: string } }
   ): Promise<{ [key: string]: string }> {
@@ -461,7 +458,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
   }
 
   // 下载单张图片
-  private async downloadSingleImage(docId: string, imgUrl: string, cookie?: string, accessToken?: string | null): Promise<string> {
+  private static async downloadSingleImage(docId: string, imgUrl: string, cookie?: string, accessToken?: string | null): Promise<string> {
     if (accessToken) {
       return await saveDocImageUrlWithToken(docId, imgUrl, accessToken, cookie);
     } else {
@@ -470,7 +467,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
   }
 
   // 理解单张图片
-  private async recognizeSingleImage(
+  private static async recognizeSingleImage(
     runtime: ImgRecognitionAgentRuntime,
     imagePath: string,
     slotKey: string,
@@ -480,7 +477,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
     const absoluteImagePath = path.join(process.cwd(), imagePath);
 
     let beforeLogMsg = `开始进行图片识别! 图片链接：${originalUrl}`;
-    this.logger.info(beforeLogMsg);
+    runtime.logger.info(beforeLogMsg);
     runtime.callback.onMessage(beforeLogMsg);
 
     const recognitionResult = await ImgRecognitionAgent.recognizeImage(
@@ -489,7 +486,7 @@ export class ResetInputAndInitModulesEndpoint implements ReqRespEndpoint{
       undefined
     );
 
-    this.logger.info('图片识别完成');
+    runtime.logger.info('图片识别完成');
     return recognitionResult.content;
   }
 }

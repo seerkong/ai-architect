@@ -10,11 +10,8 @@ import { SnapshotService } from "../../crud/SnapshotService";
 import { ReqRespEndpoint } from "../../http/HttpEndpoint";
 import { ModuleDesignRequest, ProjectEntityType, ProjectStatus, SSEChatData, SSEChatEventType } from "@shared/contract";
 
-export class ModuleDesignEndpoint implements ReqRespEndpoint {
-  constructor(
-    private logger: Logger) { }
-
-  public async handle(
+export class ModuleDesignEndpoint {
+  public static async handle(
     httpCtx: HttpCtx,
     request: any
   ) {
@@ -40,7 +37,7 @@ export class ModuleDesignEndpoint implements ReqRespEndpoint {
     // 构造agent运行时
     let agentRuntime: ArchitectAgentRuntime = await makeAgentRuntime(
       httpCtx,
-      this.logger,
+      httpCtx.logger,
       conversationAndMsgResult,
       dbSnapshot,
       historyMessages

@@ -9,11 +9,8 @@ export interface AcceptChangeRequest {
   conversationId: string;
 }
 
-export class AcceptChangeEndpoint implements ReqRespEndpoint {
-  constructor(
-    private logger: Logger) { }
-
-  public async handle(
+export class AcceptChangeEndpoint {
+  public static async handle(
     httpCtx: HttpCtx,
     request: any
   ) {

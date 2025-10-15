@@ -1,4 +1,7 @@
+import { Logger } from "../helper/logger";
+
 export interface HttpCtx {
+  logger: Logger;
   // 非流式输出相关 start
   response(httpStatus: number, body: any): void;
   responseOk(body: any): void;

@@ -1,7 +1,16 @@
 import { HttpCtx } from "./HttpCtx";
+import { Logger, logger as defaultLogger } from "../helper/logger";
 
 export class KoaHttpCtx implements HttpCtx {
-  constructor(private ctx: any) { }
+  private _logger: Logger;
+
+  constructor(private ctx: any, logger?: Logger) {
+    this._logger = logger || defaultLogger;
+  }
+
+  public get logger(): Logger {
+    return this._logger;
+  }
 
   public response(httpStatus: number, body: any): void {
     this.ctx.status = httpStatus;

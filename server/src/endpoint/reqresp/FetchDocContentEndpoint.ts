@@ -5,11 +5,8 @@ import { ReqRespEndpoint } from "../../http/HttpEndpoint";
 import { FetchDocContentRequest, FetchDocContentResponse } from "@shared/contract";
 
 
-export class FetchDocContentEndpoint implements ReqRespEndpoint {
-  constructor(
-    private logger: Logger) { }
-
-  public async handle(
+export class FetchDocContentEndpoint {
+  public static async handle(
     httpCtx: HttpCtx,
     request: any
   ) {

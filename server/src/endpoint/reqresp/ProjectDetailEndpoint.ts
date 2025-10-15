@@ -8,11 +8,8 @@ export interface ProjectDetailRequest {
   projectKey: string;
 }
 
-export class ProjectDetailEndpoint implements ReqRespEndpoint {
-  constructor(
-    private logger: Logger) { }
-
-  public async handle(
+export class ProjectDetailEndpoint {
+  public static async handle(
     httpCtx: HttpCtx,
     request: any
   ) {

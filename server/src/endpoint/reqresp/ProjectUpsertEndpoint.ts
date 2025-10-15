@@ -7,11 +7,8 @@ export interface ProjectUpsertRequest {
   projectKey: string;
 }
 
-export class ProjectUpsertEndpoint implements ReqRespEndpoint {
-  constructor(
-    private logger: Logger) { }
-
-  public async handle(
+export class ProjectUpsertEndpoint {
+  public static async handle(
     httpCtx: HttpCtx,
     request: any
   ) {

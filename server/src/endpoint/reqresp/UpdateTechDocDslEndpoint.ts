@@ -6,11 +6,8 @@ import { HttpCtx } from "../../http/HttpCtx";
 import { Logger } from "../../helper/logger";
 import { ReqRespEndpoint } from "../../http/HttpEndpoint";
 
-export class UpdateTechDocDslEndpoint implements ReqRespEndpoint {
-  constructor(
-    private logger: Logger) { }
-
-  public async handle(
+export class UpdateTechDocDslEndpoint {
+  public static async handle(
     httpCtx: HttpCtx,
     request: any
   ) {

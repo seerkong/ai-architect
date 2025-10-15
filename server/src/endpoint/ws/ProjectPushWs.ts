@@ -1,4 +1,5 @@
 import { logger } from '../../helper/logger';
+import { Logger, logger as defaultLogger } from "../../helper/logger";
 
 /**
  * WebSocket连接信息
@@ -34,7 +35,7 @@ export class ProjectPushWs {
   private logger: typeof logger;
 
   private constructor() {
-    this.logger = logger;
+    this.logger = defaultLogger;
   }
 
   /**
