@@ -310,7 +310,7 @@ ${techDocContent}
     }
 
     // 返回结构化结果
-    console.log("------ai resonpse structured data:\n", JSON.stringify(patch, null, 2));
+    // console.log("------ai resonpse structured data:\n", JSON.stringify(patch, null, 2));
     return {
       content: (message.content || ''),
       mutation: patch,

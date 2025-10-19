@@ -167,7 +167,7 @@ export class ResetInputAndInitModulesEndpoint {
     // 完全创建新的dslState, 基于这个版本做patch
     let dslStateAfter = JSON.parse(JSON.stringify(dbSnapshot.currentDslState));
     let dslNewState = patchDslState(dslStateAfter, chatResult.mutation);
-    console.log('after init, dslState: ', dslNewState);
+    // console.log('after init, dslState: ', dslNewState);
     // 这个会话最开始的版本到当前版本总计的变更
     let conversationDiff = diffSnapshot(dbSnapshot.currentDslState, dslNewState);
 

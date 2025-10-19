@@ -651,6 +651,30 @@ export default {
             console.warn('VueMermaid 扩展加载失败:', error)
           }
 
+          // 添加MutationPartial扩展
+          try {
+            const VueMutationPartial = await import('../../tiptap-ext-mutation-partial/src/index.ts')
+            extensions.push(VueMutationPartial.default)
+          } catch (error) {
+            console.warn('VueMutationPartial 扩展加载失败:', error)
+          }
+
+          // 添加HumanConfirmPartial扩展
+          try {
+            const VueHumanConfirmPartial = await import('../../tiptap-ext-human-confirm-partial/src/index.ts')
+            extensions.push(VueHumanConfirmPartial.default)
+          } catch (error) {
+            console.warn('VueHumanConfirmPartial 扩展加载失败:', error)
+          }
+
+          // 添加Think扩展
+          try {
+            const VueThink = await import('../../tiptap-ext-think/src/index.ts')
+            extensions.push(VueThink.default)
+          } catch (error) {
+            console.warn('VueThink 扩展加载失败:', error)
+          }
+
           // 创建编辑器
           this.editor = new Editor({
             extensions,

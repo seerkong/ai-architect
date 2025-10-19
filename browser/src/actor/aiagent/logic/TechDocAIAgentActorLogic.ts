@@ -172,6 +172,14 @@ export class TechDocAIAgentActorLogic implements TechDocAIAgentActorApi {
         getContent() {
           const editor = (this as any).$refs.tiptapEditor;
           return editor ? editor.getHTML() : '';
+        },
+        async scrollToBottom() {
+          // 滚动到底部
+          await (this as any).$nextTick();
+          const editorElement = (this as any).$el?.querySelector('.editor-wrapper');
+          if (editorElement) {
+            editorElement.scrollTop = editorElement.scrollHeight;
+          }
         }
       },
       render() {
@@ -202,12 +210,18 @@ export class TechDocAIAgentActorLogic implements TechDocAIAgentActorApi {
 
     // 保存编辑器实例到 runtime
     this.runtime.data.chatOutputEditor = {
+      get editor() {
+        // 动态获取底层的 Tiptap 编辑器实例
+        const tiptapEditor = (vm as any).$refs?.tiptapEditor;
+        return tiptapEditor?.editor || null;
+      },
       setContent: (htmlContent: string) => (vm as any).setContent(htmlContent),
       appendText: (text: string) => (vm as any).appendText(text),
       appendContent: (htmlContent: string) => (vm as any).appendContent(htmlContent),
       appendHardBreak: () => (vm as any).appendHardBreak(),
       appendParagraph: () => (vm as any).appendParagraph(),
-      getContent: () => (vm as any).getContent()
+      getContent: () => (vm as any).getContent(),
+      scrollToBottom: () => (vm as any).scrollToBottom()
     };
 
     // 也暴露到全局对象（可选，方便调试）
