@@ -3,7 +3,7 @@ import { TechDocAIAgentPrivateLogic } from "./TechDocAIAgentPrivateLogic";
 import { ProjectPushWsManager, WebSocketStatus, PushMessage } from "../../websocket/ProjectPushWsManager";
 import { TechDocAIAgentActorApi } from "../contract/TechDocAiAgentActorApi";
 import { TechDocAIAgentRuntime } from "../contract/TechDocAIAgentRuntime";
-import { AiAgentMode, SSE_URL_RESET_INPUT_AND_INIT_MODULES, TechDesignSnapshotDsl} from "@shared/contract"
+import { AiAgentMode, SSE_URL_RESET_INPUT_AND_INIT_MODULES, TechDesignSnapshotDsl } from "@shared/contract"
 import { EmptyDesignDsl } from "@shared/sample/EmptyDesignDsl";
 
 export class TechDocAIAgentActorLogic implements TechDocAIAgentActorApi {
@@ -21,13 +21,18 @@ export class TechDocAIAgentActorLogic implements TechDocAIAgentActorApi {
 
   async mount(): Promise<void> {
     console.log('TechDocAIAgentActorLogic: 开始初始化JSON可视化组件...');
-    
+
     // 初始化3个JSON可视化组件
     await this.initJsonVisualizer('dsl');
     await this.initJsonVisualizer('conversation');
     await this.initJsonVisualizer('answer');
-    
+
     console.log('TechDocAIAgentActorLogic: JSON可视化组件初始化完成');
+
+    // 初始化聊天输出富文本编辑器
+    await this.initChatOutputEditor();
+
+    console.log('TechDocAIAgentActorLogic: 聊天输出编辑器初始化完成');
   }
 
   // 初始化JSON可视化组件
@@ -89,6 +94,128 @@ export class TechDocAIAgentActorLogic implements TechDocAIAgentActorApi {
     console.log(`JSON可视化组件已初始化: ${type}`);
   }
 
+  // 初始化聊天输出富文本编辑器
+  private async initChatOutputEditor(): Promise<void> {
+    const container = document.getElementById('chat-output');
+    if (!container) {
+      console.warn('chat-output 容器未找到');
+      return;
+    }
+
+    // 动态导入 Vue 和 TiptapEditorCapsule
+    const { createApp, h, nextTick } = await import('vue');
+    const { TiptapEditorCapsule } = await import('../../../../packages/tiptap-capsule/src/index');
+
+    const app = createApp({
+      data() {
+        return {
+          htmlContent: '<p style="color: #999; font-style: italic; margin: 0;">等待输入...</p>'
+        };
+      },
+      methods: {
+        async setContent(htmlContent: string) {
+          (this as any).htmlContent = htmlContent;
+          await (this as any).$nextTick();
+          const editor = (this as any).$refs.tiptapEditor;
+          if (editor) {
+            editor.setHTML(htmlContent);
+          }
+        },
+        async appendText(text: string) {
+          const editor = (this as any).$refs.tiptapEditor;
+          if (editor && editor.editor) {
+            // 获取底层的Tiptap编辑器实例
+            const tiptapEditor = editor.editor;
+
+            // 将光标移到文档末尾，并插入文本（不创建新段落）
+            tiptapEditor.chain().focus('end').insertContent(text).run();
+
+            // 滚动到底部
+            await (this as any).$nextTick();
+            const editorElement = (this as any).$el.querySelector('.editor-wrapper');
+            if (editorElement) {
+              editorElement.scrollTop = editorElement.scrollHeight;
+            }
+          }
+        },
+        async appendContent(htmlContent: string) {
+          const editor = (this as any).$refs.tiptapEditor;
+          if (editor && editor.editor) {
+            // 获取底层的Tiptap编辑器实例
+            const tiptapEditor = editor.editor;
+
+            // 在文档末尾插入HTML内容
+            tiptapEditor.chain().focus('end').insertContent(htmlContent).run();
+
+            // 滚动到底部
+            await (this as any).$nextTick();
+            const editorElement = (this as any).$el.querySelector('.editor-wrapper');
+            if (editorElement) {
+              editorElement.scrollTop = editorElement.scrollHeight;
+            }
+          }
+        },
+        async appendHardBreak() {
+          const editor = (this as any).$refs.tiptapEditor;
+          if (editor && editor.editor) {
+            // 插入硬换行（不创建新段落）
+            editor.editor.chain().focus('end').setHardBreak().run();
+          }
+        },
+        async appendParagraph() {
+          const editor = (this as any).$refs.tiptapEditor;
+          if (editor && editor.editor) {
+            // 创建新段落
+            editor.editor.chain().focus('end').createParagraphNear().run();
+          }
+        },
+        getContent() {
+          const editor = (this as any).$refs.tiptapEditor;
+          return editor ? editor.getHTML() : '';
+        }
+      },
+      render() {
+        return h('div', {
+          style: 'width: 100%; height: 100%; display: flex; flex-direction: column;',
+          class: 'chat-output-editor-container'
+        }, [
+          h(TiptapEditorCapsule, {
+            ref: 'tiptapEditor',
+            modelValue: (this as any).htmlContent,
+            'onUpdate:modelValue': (value: string) => {
+              (this as any).htmlContent = value;
+            },
+            enableVueTextBtnDemo: false,
+            enableBubbleMenu: false,
+            editable: false, // 设置为只读模式
+            showToolbar: false, // 隐藏工具栏
+            showOutput: false,
+            heightMode: 'fixed',
+            style: 'flex: 1; overflow: hidden;'
+          })
+        ]);
+      }
+    });
+
+    const vm = app.mount(container);
+    await nextTick();
+
+    // 保存编辑器实例到 runtime
+    this.runtime.data.chatOutputEditor = {
+      setContent: (htmlContent: string) => (vm as any).setContent(htmlContent),
+      appendText: (text: string) => (vm as any).appendText(text),
+      appendContent: (htmlContent: string) => (vm as any).appendContent(htmlContent),
+      appendHardBreak: () => (vm as any).appendHardBreak(),
+      appendParagraph: () => (vm as any).appendParagraph(),
+      getContent: () => (vm as any).getContent()
+    };
+
+    // 也暴露到全局对象（可选，方便调试）
+    (window as any).chatOutputEditor = this.runtime.data.chatOutputEditor;
+
+    console.log('聊天输出富文本编辑器已初始化');
+  }
+
   getTechDocDsl(): TechDesignSnapshotDsl {
     return this.runtime.data.techDocDsl;
   }
@@ -102,7 +229,8 @@ export class TechDocAIAgentActorLogic implements TechDocAIAgentActorApi {
         techDocDsl: EmptyDesignDsl,
         conversationMutation: null,
         answerMutation: null,
-        suggestion: []
+        suggestion: [],
+        chatOutputEditor: null
       },
     };
   }
@@ -158,22 +286,31 @@ export class TechDocAIAgentActorLogic implements TechDocAIAgentActorApi {
    */
   private handleSSEPushMessage(message: PushMessage): void {
     // 这里可以将WebSocket推送的消息转发给聊天输出或其他UI组件
-    const chatOutput = document.getElementById('chat-output');
-    if (chatOutput && message.event) {
+    const chatEditor = this.runtime.data.chatOutputEditor;
+    if (chatEditor && message.event) {
       const timestamp = new Date().toLocaleTimeString();
       const content = message.content || '';
       const data = message.data ? JSON.stringify(message.data, null, 2) : '';
 
-      chatOutput.textContent += `[${timestamp}] WebSocket推送 - ${message.event}\n`;
+      let html = `<p style="color: #007acc; font-weight: bold;">[${timestamp}] WebSocket推送 - ${message.event}</p>`;
       if (content) {
-        chatOutput.textContent += `内容: ${content}\n`;
+        html += `<p>内容: ${this.escapeHtml(content)}</p>`;
       }
       if (data) {
-        chatOutput.textContent += `数据: ${data}\n`;
+        html += `<pre style="background: #f5f5f5; padding: 8px; border-radius: 4px; overflow-x: auto;"><code>${this.escapeHtml(data)}</code></pre>`;
       }
-      chatOutput.textContent += '\n';
-      chatOutput.scrollTop = chatOutput.scrollHeight;
+
+      chatEditor.appendContent(html);
     }
+  }
+
+  /**
+   * HTML转义辅助函数
+   */
+  private escapeHtml(str: string): string {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   /**

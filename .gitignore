@@ -25,6 +25,7 @@ tsconfig.tsbuildinfo
 
 # Environment variables
 config.*.toml
+config.toml
 
 # Runtime data
 pids

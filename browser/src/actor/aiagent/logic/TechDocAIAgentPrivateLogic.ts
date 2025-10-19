@@ -36,8 +36,12 @@ export class TechDocAIAgentPrivateLogic {
 
     } catch (error) {
       console.error('启动SSE失败:', error);
-      const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
-      chatOutput.textContent += '\n[错误] ' + (error instanceof Error ? error.message : '未知错误');
+      const chatEditor = this.runtime.data.chatOutputEditor;
+      if (chatEditor) {
+        const errorMessage = error instanceof Error ? error.message : '未知错误';
+        const errorHtml = `<p style="color: #dc3545; font-weight: bold;">[错误] ${errorMessage}</p>`;
+        chatEditor.appendContent(errorHtml);
+      }
     }
   }
 
@@ -168,9 +172,15 @@ export class TechDocAIAgentPrivateLogic {
       await updateViewsByDslSnapshot(this.mesh, this.runtime, dslSnapshot);
 
       // 显示成功消息
-      const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
-      chatOutput.textContent = `项目详情获取成功！\n项目ID: ${projectKey}\n详情数据已打印到控制台`;
-      chatOutput.classList.remove('chat-output-placeholder');
+      const chatEditor = this.runtime.data.chatOutputEditor;
+      if (chatEditor) {
+        const successHtml = `
+          <p style="color: #28a745; font-weight: bold;">✓ 项目详情获取成功！</p>
+          <p>项目ID: <strong>${projectKey}</strong></p>
+          <p style="color: #666; font-style: italic;">详情数据已打印到控制台</p>
+        `;
+        chatEditor.setContent(successHtml);
+      }
 
     } catch (error) {
       console.error('获取项目详情失败:', error);

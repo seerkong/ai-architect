@@ -17,4 +17,7 @@ export interface TechDocAIAgentData {
   answerMutation: any;
   // 大模型返回的建议内容
   suggestion: any[]
+
+  // 聊天输出富文本编辑器实例（通过全局对象访问）
+  chatOutputEditor: any;
 }

@@ -33,8 +33,8 @@ export class ProjectActionsComponent {
     `;
   }
 
-  update(params: any) {}
-  dispose() {}
+  update(params: any) { }
+  dispose() { }
 }
 
 // ========== 右侧：对话历史组件（中部） ==========
@@ -48,15 +48,16 @@ export class ChatHistoryComponent {
   }
 
   init(params: any) {
+    // 创建一个容器用于挂载 TiptapEditorCapsule 富文本编辑器
     this.element.innerHTML = `
-      <div id="chat-output" class="chat-history-panel">
-        等待输入...
+      <div id="chat-output" style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #fff;">
+        <!-- Vue 应用将挂载在这里 -->
       </div>
     `;
   }
 
-  update(params: any) {}
-  dispose() {}
+  update(params: any) { }
+  dispose() { }
 }
 
 // ========== 右侧：对话输入组件（下部） ==========
@@ -97,7 +98,7 @@ export class ChatInputComponent {
     `;
   }
 
-  update(params: any) {}
-  dispose() {}
+  update(params: any) { }
+  dispose() { }
 }
 

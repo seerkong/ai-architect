@@ -50,8 +50,6 @@ export abstract class BaseSSEHandler {
    * 子类可以重写此方法来处理特定的消息类型
    */
   protected handleSSEMessage(message: SSEMessage): void {
-    const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
-
     if (message.event === 'done') {
       console.log('Stream completed');
       this.resetButtonStates();
@@ -70,18 +68,42 @@ export abstract class BaseSSEHandler {
       this.handleResultMessage(message);
     } else if (message.event === 'message') {
       if (message.content) {
-        chatOutput.textContent += message.content;
-        // 自动滚动到底部
-        chatOutput.scrollTop = chatOutput.scrollHeight;
+        // 使用富文本编辑器追加内容
+        const chatEditor = this.runtime.data.chatOutputEditor;
+        if (chatEditor) {
+          // 检查内容中是否包含换行符
+          if (message.content.includes('\n')) {
+            // 有换行符，按行处理
+            const lines = message.content.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+              if (i > 0) {
+                // 在非首行之前插入硬换行
+                chatEditor.appendHardBreak();
+              }
+              if (lines[i]) {
+                // 追加文本（不创建新段落）
+                chatEditor.appendText(lines[i]);
+              }
+            }
+          } else {
+            // 无换行符，直接追加文本
+            chatEditor.appendText(message.content);
+          }
+        }
       }
     }
 
     if (message.error) {
-      chatOutput.textContent += '\n[错误] ' + message.error;
+      const chatEditor = this.runtime.data.chatOutputEditor;
+      if (chatEditor) {
+        const errorHtml = `<p style="color: #dc3545; font-weight: bold;">[错误] ${message.error}</p>`;
+        chatEditor.appendContent(errorHtml);
+      }
       this.resetButtonStates();
       this.runtime.data.chatReader = null;
     }
   }
+
 
   /**
    * 处理result消息
@@ -116,9 +138,11 @@ export abstract class BaseSSEHandler {
    * 清空聊天输出
    */
   private clearChatOutput(): void {
-    const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
-    chatOutput.textContent = '';
-    chatOutput.classList.remove('chat-output-placeholder');
+    const chatEditor = this.runtime.data.chatOutputEditor;
+    if (chatEditor) {
+      // 设置一个空段落，作为流式输出的起点
+      chatEditor.setContent('<p></p>');
+    }
   }
 
   /**
@@ -166,8 +190,12 @@ export abstract class BaseSSEHandler {
 
     } catch (error) {
       console.error('SSE Error:', error);
-      const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
-      chatOutput.textContent += '\n[错误] ' + (error instanceof Error ? error.message : '未知错误');
+      const chatEditor = this.runtime.data.chatOutputEditor;
+      if (chatEditor) {
+        const errorMessage = error instanceof Error ? error.message : '未知错误';
+        const errorHtml = `<p style="color: #dc3545; font-weight: bold;">[错误] ${errorMessage}</p>`;
+        chatEditor.appendContent(errorHtml);
+      }
       this.resetButtonStates();
       this.runtime.data.chatReader = null;
     }
@@ -258,7 +286,10 @@ export abstract class BaseSSEHandler {
 
     this.resetButtonStates();
 
-    const chatOutput = document.getElementById('chat-output') as HTMLDivElement;
-    chatOutput.textContent += '\n\n[已停止]';
+    const chatEditor = this.runtime.data.chatOutputEditor;
+    if (chatEditor) {
+      const stopHtml = '<p style="color: #666; font-style: italic;">[已停止]</p>';
+      chatEditor.appendContent(stopHtml);
+    }
   }
 }
